@@ -29,6 +29,31 @@ function CheckoutPage() {
     setPlacing(true);
 
     try {
+      if (paymentMethod === "stripe") {
+        const response = await fetch(`${API_BASE_URL}/payments/create-checkout-session`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(isAuthenticated ? { Authorization: token } : {}),
+          },
+          body: JSON.stringify({
+            customerInfo,
+            items,
+            subtotal,
+            shipping: 0,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Unable to start Stripe checkout.");
+        }
+
+        window.location.href = data.url;
+        return;
+      }
+
       const endpoint = isAuthenticated ? "/orders/customer" : "/orders";
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: "POST",
@@ -471,8 +496,8 @@ function CheckoutPage() {
               </div>
 
               <div className="payment-note">
-                Payment integration is not live yet. This screen is ready for hosted Stripe Checkout,
-                with PayNow kept as a manual option until the business account is connected.
+                Stripe opens a secure hosted checkout in test mode. PayNow is kept as a manual option
+                until the business is ready to accept non-card payments.
               </div>
               {error && <div className="checkout-error">{error}</div>}
             </div>

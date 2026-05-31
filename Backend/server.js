@@ -8,6 +8,7 @@ const productRoutes = require("./routes/products");
 const userRoutes = require("./routes/users");
 const orderRoutes = require("./routes/orders");
 const showcaseRoutes = require("./routes/showcase");
+const paymentRoutes = require("./routes/payments");
 
 const app = express();
 
@@ -30,12 +31,20 @@ app.use(
     },
   })
 );
+
+app.post(
+  "/payments/webhook",
+  express.raw({ type: "application/json" }),
+  paymentRoutes.webhookHandler
+);
+
 app.use(express.json());
 
 app.use("/products", productRoutes);
 app.use("/users", userRoutes);
 app.use("/orders", orderRoutes);
 app.use("/showcase", showcaseRoutes);
+app.use("/payments", paymentRoutes.router);
 app.use(
   "/uploads",
   express.static("uploads")

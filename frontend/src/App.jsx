@@ -14,6 +14,8 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
+import CheckoutSuccessPage from "./pages/CheckoutSuccessPage";
+import CheckoutCancelPage from "./pages/CheckoutCancelPage";
 import CustomerLoginPage from "./pages/CustomerLoginPage";
 import CustomerRegisterPage from "./pages/CustomerRegisterPage";
 import AccountPage from "./pages/AccountPage";
@@ -74,6 +76,16 @@ function App() {
         <Route
           path="/checkout"
           element={<CheckoutPage />}
+        />
+
+        <Route
+          path="/checkout/success"
+          element={<CheckoutSuccessPage />}
+        />
+
+        <Route
+          path="/checkout/cancel"
+          element={<CheckoutCancelPage />}
         />
 
         <Route

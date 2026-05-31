@@ -53,6 +53,9 @@ const orderSchema = new mongoose.Schema(
       type: String,
       default: "pending",
     },
+    stripeSessionId: String,
+    stripePaymentIntentId: String,
+    paidAt: Date,
     orderStatus: {
       type: String,
       default: "received",
