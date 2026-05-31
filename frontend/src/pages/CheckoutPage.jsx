@@ -268,6 +268,11 @@ function CheckoutPage() {
           align-items: center;
           justify-content: center;
           flex: 0 0 auto;
+          border-radius: 8px;
+          background: #fff;
+          box-shadow:
+            0 10px 22px rgba(45, 17, 85, 0.12),
+            0 2px 6px rgba(45, 17, 85, 0.08);
         }
 
         .payment-logo img {
@@ -275,7 +280,7 @@ function CheckoutPage() {
           height: 34px;
           display: block;
           object-fit: contain;
-          filter: drop-shadow(0 6px 14px rgba(45, 17, 85, 0.08));
+          border-radius: 8px;
         }
 
         .checkout-error {

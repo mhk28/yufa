@@ -74,7 +74,7 @@ function ProductDetailPage() {
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Jost:wght@300;400;500&display=swap');
 
         .product-detail-section {
-          padding: clamp(54px, 8vw, 104px) clamp(22px, 5vw, 72px);
+          padding: clamp(36px, 6vw, 82px) clamp(22px, 5vw, 72px);
         }
 
         .product-detail-grid {
@@ -83,7 +83,7 @@ function ProductDetailPage() {
           display: grid;
           grid-template-columns: minmax(320px, 0.95fr) minmax(320px, 0.8fr);
           gap: clamp(36px, 7vw, 92px);
-          align-items: center;
+          align-items: start;
         }
 
         .detail-gallery {
@@ -150,7 +150,7 @@ function ProductDetailPage() {
           display: inline-flex;
           align-items: center;
           gap: 9px;
-          margin-bottom: 32px;
+          margin-bottom: 22px;
           font-family: 'Jost', sans-serif;
           font-size: 10px;
           letter-spacing: 0.2em;
@@ -184,7 +184,7 @@ function ProductDetailPage() {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 10px;
-          margin: 0 0 28px;
+          margin: 0 0 22px;
         }
 
         .detail-info-item {
@@ -215,7 +215,7 @@ function ProductDetailPage() {
           letter-spacing: 0.24em;
           text-transform: uppercase;
           color: #c9a84c;
-          margin: 0 0 16px;
+          margin: 0 0 12px;
         }
 
         .detail-title {
@@ -224,17 +224,17 @@ function ProductDetailPage() {
           font-weight: 300;
           line-height: 0.94;
           color: #1a0a2e;
-          margin: 0 0 28px;
+          margin: 0 0 22px;
         }
 
         .detail-description {
           max-width: 520px;
           font-family: 'Jost', sans-serif;
-          font-size: 15px;
-          font-weight: 300;
-          line-height: 1.95;
-          color: rgba(45, 17, 85, 0.58);
-          margin: 0 0 34px;
+          font-size: 16px;
+          font-weight: 400;
+          line-height: 1.75;
+          color: rgba(45, 17, 85, 0.66);
+          margin: 0 0 24px;
         }
 
         .detail-price {
@@ -242,7 +242,7 @@ function ProductDetailPage() {
           font-size: 34px;
           font-weight: 400;
           color: #2d1155;
-          margin: 0 0 26px;
+          margin: 0 0 22px;
         }
 
         .variant-field {
@@ -334,17 +334,42 @@ function ProductDetailPage() {
 
         @media (max-width: 560px) {
           .product-detail-section {
-            padding: 34px 20px 58px;
+            padding: 18px 12px 48px;
+          }
+
+          .product-detail-grid {
+            gap: 22px;
+          }
+
+          .detail-gallery {
+            gap: 10px;
+          }
+
+          .detail-image-frame {
+            aspect-ratio: 1 / 1.14;
+          }
+
+          .detail-thumbs {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 7px;
+          }
+
+          .detail-breadcrumb {
+            margin-bottom: 16px;
+            font-size: 9px;
+            letter-spacing: 0.14em;
           }
 
           .detail-title {
             font-size: clamp(42px, 14vw, 62px);
             line-height: 0.94;
+            margin-bottom: 16px;
           }
 
           .detail-description {
-            font-size: 14px;
-            line-height: 1.82;
+            font-size: 15px;
+            line-height: 1.65;
+            margin-bottom: 18px;
           }
 
           .detail-actions {
@@ -353,7 +378,37 @@ function ProductDetailPage() {
           }
 
           .detail-info-strip {
-            grid-template-columns: 1fr;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            margin-bottom: 18px;
+            padding-bottom: 2px;
+            scrollbar-width: none;
+          }
+
+          .detail-info-strip::-webkit-scrollbar {
+            display: none;
+          }
+
+          .detail-info-item {
+            flex: 0 0 auto;
+            min-width: 112px;
+            padding: 9px 10px;
+          }
+
+          .detail-info-label {
+            font-size: 8px;
+            letter-spacing: 0.1em;
+          }
+
+          .detail-info-value {
+            font-size: 11px;
+            white-space: nowrap;
+          }
+
+          .detail-price {
+            font-size: 30px;
+            margin-bottom: 18px;
           }
 
           .detail-primary,

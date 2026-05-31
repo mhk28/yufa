@@ -6,6 +6,7 @@ import {
 
 import { CartProvider } from "./context/CartContext";
 import { CustomerAuthProvider } from "./context/CustomerAuthContext";
+import ScrollToTop from "./components/ScrollToTop";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import CollectionsStorePage from "./pages/CollectionsStorePage";
@@ -35,6 +36,7 @@ function App() {
     <CustomerAuthProvider>
       <CartProvider>
         <BrowserRouter>
+          <ScrollToTop />
 
       <Routes>
 

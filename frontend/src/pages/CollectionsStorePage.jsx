@@ -17,6 +17,7 @@ function CollectionsStorePage() {
   const [assortmentFilter, setAssortmentFilter] = useState("all");
   const [designFilter, setDesignFilter] = useState("all");
   const [sortBy, setSortBy] = useState("featured");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const activeCategory = CATEGORY_OPTIONS.find((option) => categoryToSlug(option.name) === category);
 
   useEffect(() => {
@@ -121,6 +122,11 @@ function CollectionsStorePage() {
 
   const hasFilters =
     searchTerm.trim() || assortmentFilter !== "all" || designFilter !== "all" || sortBy !== "featured";
+  const activeFilterCount = [
+    assortmentFilter !== "all",
+    designFilter !== "all",
+    sortBy !== "featured",
+  ].filter(Boolean).length;
 
   const clearFilters = () => {
     setSearchTerm("");
@@ -253,6 +259,10 @@ function CollectionsStorePage() {
           align-items: end;
           padding-top: 16px;
           border-top: 1px solid rgba(201, 168, 76, 0.16);
+        }
+
+        .mobile-filter-toggle {
+          display: none;
         }
 
         .discovery-field {
@@ -440,18 +450,85 @@ function CollectionsStorePage() {
           }
 
           .collection-filter {
-            gap: 10px;
+            gap: 12px;
+            margin-bottom: 12px;
           }
 
           .collection-chip-row {
+            width: calc(100% + 24px);
+            margin-left: -12px;
+            padding: 0 12px 4px;
             gap: 8px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            scrollbar-width: none;
+          }
+
+          .collection-chip-row::-webkit-scrollbar {
+            display: none;
           }
 
           .collection-chip {
+            flex: 0 0 auto;
             min-height: 36px;
             padding: 0 12px;
             font-size: 10px;
             letter-spacing: 0.08em;
+          }
+
+          .collection-search-input {
+            width: 100%;
+            flex-basis: 100%;
+            min-height: 46px;
+            font-size: 16px;
+          }
+
+          .mobile-filter-toggle {
+            width: 100%;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            border: 1px solid rgba(201, 168, 76, 0.24);
+            border-radius: 999px;
+            background: #fff;
+            color: #2d1155;
+            font-family: 'Jost', sans-serif;
+            font-size: 11px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            cursor: pointer;
+          }
+
+          .mobile-filter-toggle span {
+            color: #c9a84c;
+          }
+
+          .discovery-panel {
+            display: none;
+            padding-top: 12px;
+            border-top: none;
+          }
+
+          .discovery-panel.open {
+            display: grid;
+          }
+
+          .discovery-label {
+            font-size: 9px;
+            letter-spacing: 0.14em;
+          }
+
+          .discovery-select {
+            height: 46px;
+            border-radius: 999px;
+            font-size: 16px;
+          }
+
+          .clear-filters {
+            height: 44px;
+            border-radius: 0;
           }
 
           .products-store-grid {
@@ -462,6 +539,8 @@ function CollectionsStorePage() {
           .collection-results-bar {
             flex-direction: column;
             align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 16px;
           }
         }
 
@@ -506,9 +585,17 @@ function CollectionsStorePage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
+              <button
+                className="mobile-filter-toggle"
+                type="button"
+                onClick={() => setFiltersOpen((current) => !current)}
+              >
+                Filters
+                <span>{activeFilterCount ? `${activeFilterCount} active` : filtersOpen ? "Hide" : "Show"}</span>
+              </button>
             </div>
 
-            <div className="discovery-panel">
+            <div className={`discovery-panel ${filtersOpen ? "open" : ""}`}>
               <label className="discovery-field">
                 <span className="discovery-label">Fabric / Type</span>
                 <select
