@@ -167,11 +167,57 @@ function AdminOrdersPage() {
 
         @media (max-width: 760px) {
           .admin-stat-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 9px;
+          }
+
+          .admin-page-header {
+            margin-bottom: 18px;
+          }
+
+          .admin-title {
+            font-size: 32px;
+          }
+
+          .admin-stat-card {
+            padding: 13px 10px;
+          }
+
+          .admin-stat-label {
+            font-size: 8px;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+          }
+
+          .admin-stat-value {
+            font-size: 24px;
+            overflow-wrap: anywhere;
+          }
+
+          .order-admin-card {
+            padding: 14px;
+            margin-bottom: 10px;
           }
 
           .order-admin-top {
             flex-direction: column;
+            gap: 12px;
+          }
+
+          .order-admin-id {
+            font-size: 22px;
+          }
+
+          .order-admin-meta,
+          .order-admin-item {
+            font-size: 12px;
+            line-height: 1.55;
+            overflow-wrap: anywhere;
+          }
+
+          .order-status-select {
+            width: 100%;
+            min-height: 40px;
           }
         }
       `}</style>

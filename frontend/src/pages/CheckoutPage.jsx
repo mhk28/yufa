@@ -5,6 +5,48 @@ import { useCart } from "../context/CartContext";
 import { useCustomerAuth } from "../context/CustomerAuthContext";
 import { API_BASE_URL, formatCurrency } from "../utils/storefront";
 
+const paymentLogos = {
+  stripe: (
+    <svg viewBox="0 0 82 34" role="img" aria-label="Stripe" focusable="false">
+      <rect width="82" height="34" rx="7" fill="#635BFF" />
+      <text x="41" y="22" textAnchor="middle" fill="#fff" fontFamily="Arial, sans-serif" fontSize="15" fontWeight="700">
+        stripe
+      </text>
+    </svg>
+  ),
+  paynow: (
+    <svg viewBox="0 0 82 34" role="img" aria-label="PayNow" focusable="false">
+      <rect width="82" height="34" rx="7" fill="#fff" />
+      <rect x="1" y="1" width="80" height="32" rx="6" fill="none" stroke="#b1135d" strokeWidth="1.5" />
+      <path d="M13 11h10a5 5 0 0 1 0 10h-5v4h-5V11Z" fill="#b1135d" />
+      <text x="52" y="22" textAnchor="middle" fill="#b1135d" fontFamily="Arial, sans-serif" fontSize="12" fontWeight="800">
+        PayNow
+      </text>
+    </svg>
+  ),
+  cards: (
+    <svg viewBox="0 0 82 34" role="img" aria-label="Cards" focusable="false">
+      <rect width="82" height="34" rx="7" fill="#fff" />
+      <rect x="1" y="1" width="80" height="32" rx="6" fill="none" stroke="#d8d2df" />
+      <text x="24" y="22" textAnchor="middle" fill="#1f4f8f" fontFamily="Arial, sans-serif" fontSize="12" fontWeight="800">
+        VISA
+      </text>
+      <circle cx="53" cy="17" r="8" fill="#eb001b" fillOpacity="0.86" />
+      <circle cx="63" cy="17" r="8" fill="#f79e1b" fillOpacity="0.86" />
+    </svg>
+  ),
+  apple_pay: (
+    <svg viewBox="0 0 82 34" role="img" aria-label="Apple Pay" focusable="false">
+      <rect width="82" height="34" rx="7" fill="#111" />
+      <path d="M22.5 12.1c.8-1 1.3-2.2 1.2-3.4-1.2.1-2.5.8-3.3 1.8-.8.9-1.4 2.1-1.2 3.3 1.2.1 2.5-.7 3.3-1.7Z" fill="#fff" />
+      <path d="M24.7 18.2c0-2 1.6-3 1.7-3.1-1-.1-2-.6-2.8-1.1-.9-.5-1.8-.8-2.8-.8-2 0-3.7 1.7-3.7 4.5 0 1.5.5 3.1 1.2 4.3.6 1 1.3 2.2 2.3 2.1.9 0 1.2-.6 2.3-.6s1.4.6 2.3.6c1 0 1.6-1 2.2-2 .4-.6.7-1.2.9-1.8-2.3-.9-2.6-3-2.6-3.1Z" fill="#fff" />
+      <text x="54" y="22" textAnchor="middle" fill="#fff" fontFamily="Arial, sans-serif" fontSize="13" fontWeight="700">
+        Pay
+      </text>
+    </svg>
+  ),
+};
+
 function CheckoutPage() {
   const navigate = useNavigate();
   const { items, subtotal, clearCart } = useCart();
@@ -262,30 +304,19 @@ function CheckoutPage() {
         }
 
         .payment-logo {
-          min-width: 62px;
+          width: 82px;
           height: 34px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          border-radius: 6px;
-          background: #fff;
-          border: 1px solid rgba(45, 17, 85, 0.08);
-          font-family: 'Jost', sans-serif;
-          font-size: 11px;
-          font-weight: 600;
-          color: #2d1155;
+          flex: 0 0 auto;
         }
 
-        .payment-logo.paynow {
-          color: #b1135d;
-        }
-
-        .payment-logo.card {
-          color: #1f4f8f;
-        }
-
-        .payment-logo.apple {
-          color: #1a0a2e;
+        .payment-logo svg {
+          width: 82px;
+          height: 34px;
+          display: block;
+          filter: drop-shadow(0 6px 14px rgba(45, 17, 85, 0.08));
         }
 
         .checkout-error {
@@ -455,28 +486,28 @@ function CheckoutPage() {
                     id: "stripe",
                     name: "Stripe Checkout",
                     detail: "Cards and supported wallets",
-                    logo: "stripe",
+                    logo: paymentLogos.stripe,
                     className: "",
                   },
                   {
                     id: "paynow",
                     name: "PayNow",
                     detail: "Manual transfer for now",
-                    logo: "PayNow",
+                    logo: paymentLogos.paynow,
                     className: "paynow",
                   },
                   {
                     id: "card",
                     name: "Cards",
                     detail: "Visa, Mastercard later",
-                    logo: "VISA",
+                    logo: paymentLogos.cards,
                     className: "card",
                   },
                   {
                     id: "apple_pay",
                     name: "Apple Pay",
                     detail: "Via Stripe later",
-                    logo: "Pay",
+                    logo: paymentLogos.apple_pay,
                     className: "apple",
                   },
                 ].map((method) => (

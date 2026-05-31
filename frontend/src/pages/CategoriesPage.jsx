@@ -177,6 +177,75 @@ function CategoriesPage() {
           font-size: 18px;
           color: rgba(45, 17, 85, 0.35);
         }
+
+        @media (max-width: 720px) {
+          .category-header {
+            margin-bottom: 20px;
+            padding-bottom: 18px;
+          }
+
+          .category-title {
+            font-size: 31px;
+          }
+
+          .category-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+          }
+
+          .category-card-body {
+            padding: 13px;
+          }
+
+          .category-name {
+            font-size: 19px;
+            margin-bottom: 12px;
+          }
+
+          .category-stats {
+            gap: 6px;
+            margin-bottom: 14px;
+          }
+
+          .category-stat {
+            padding: 8px 4px;
+            text-align: center;
+          }
+
+          .category-stat-value {
+            font-size: 22px;
+          }
+
+          .category-stat-label {
+            font-size: 7px;
+            letter-spacing: 0.08em;
+          }
+
+          .collection-row {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 5px;
+            padding: 9px 0;
+          }
+
+          .collection-name {
+            font-size: 11px;
+            line-height: 1.35;
+          }
+
+          .collection-meta {
+            white-space: normal;
+            font-size: 8px;
+            letter-spacing: 0.08em;
+            line-height: 1.35;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .category-grid {
+            grid-template-columns: 1fr;
+          }
+        }
       `}</style>
 
       <AdminLayout>

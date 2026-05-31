@@ -71,13 +71,13 @@ function AdminLayout({ children }) {
           }
 
           .admin-content {
-            padding: 28px 18px;
+            padding: 24px 14px;
           }
         }
 
         @media (max-width: 520px) {
           .admin-content {
-            padding: 22px 14px;
+            padding: 18px 10px 28px;
           }
         }
       `}</style>

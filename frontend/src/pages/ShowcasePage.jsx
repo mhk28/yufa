@@ -367,6 +367,81 @@ function ShowcasePage() {
             grid-template-columns: 1fr;
           }
         }
+
+        @media (max-width: 720px) {
+          .showcase-header {
+            margin-bottom: 18px;
+            padding-bottom: 18px;
+          }
+
+          .showcase-title {
+            font-size: 32px;
+          }
+
+          .showcase-panel {
+            padding: 16px;
+          }
+
+          .showcase-form {
+            gap: 12px;
+          }
+
+          .showcase-input {
+            min-height: 40px;
+            padding: 10px 11px;
+          }
+
+          .slides-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+          }
+
+          .slide-media {
+            aspect-ratio: 1 / 1.12;
+          }
+
+          .slide-body {
+            padding: 11px;
+          }
+
+          .slide-title {
+            font-size: 18px;
+            line-height: 1.05;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+
+          .slide-meta,
+          .slide-input {
+            font-size: 10px;
+          }
+
+          .slide-source {
+            font-size: 7px;
+            letter-spacing: 0.08em;
+          }
+
+          .slide-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+          }
+
+          .slide-delete,
+          .slide-save {
+            min-height: 32px;
+            padding: 7px 6px;
+            font-size: 8px;
+            letter-spacing: 0.08em;
+          }
+        }
+
+        @media (max-width: 350px) {
+          .slides-grid {
+            grid-template-columns: 1fr;
+          }
+        }
       `}</style>
 
       <AdminLayout>

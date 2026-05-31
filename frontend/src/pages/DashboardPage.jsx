@@ -234,11 +234,48 @@ function DashboardPage() {
           .dashboard-header {
             align-items: flex-start;
             flex-direction: column;
+            gap: 14px;
+            margin-bottom: 20px;
           }
 
-          .stats-grid,
+          .dashboard-title {
+            font-size: 32px;
+          }
+
+          .dashboard-action {
+            width: 100%;
+            min-height: 42px;
+          }
+
+          .stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+          }
+
+          .stat-card {
+            padding: 14px;
+          }
+
+          .stat-label {
+            font-size: 8px;
+            letter-spacing: 0.12em;
+            margin-bottom: 8px;
+          }
+
+          .stat-value {
+            font-size: 30px;
+          }
+
           .dashboard-grid {
             grid-template-columns: 1fr;
+          }
+
+          .panel {
+            padding: 16px;
+          }
+
+          .panel-title {
+            font-size: 22px;
           }
         }
       `}</style>

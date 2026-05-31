@@ -435,8 +435,8 @@ function CollectionsStorePage() {
 
           .collection-controls,
           .products-store-section {
-            padding-left: 20px;
-            padding-right: 20px;
+            padding-left: 12px;
+            padding-right: 12px;
           }
 
           .collection-filter {
@@ -455,8 +455,8 @@ function CollectionsStorePage() {
           }
 
           .products-store-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 12px 9px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px 12px;
           }
 
           .collection-results-bar {
@@ -465,11 +465,6 @@ function CollectionsStorePage() {
           }
         }
 
-        @media (max-width: 360px) {
-          .products-store-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-        }
       `}</style>
 
       <StoreLayout>

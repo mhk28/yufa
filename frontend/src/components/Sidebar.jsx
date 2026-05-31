@@ -268,10 +268,15 @@ function Sidebar() {
           }
 
           .sidebar-nav {
-            padding: 14px;
+            padding: 12px;
             flex-direction: row;
-            gap: 8px;
+            gap: 7px;
             overflow-x: auto;
+            scrollbar-width: none;
+          }
+
+          .sidebar-nav::-webkit-scrollbar {
+            display: none;
           }
 
           .nav-section-label,
@@ -282,9 +287,11 @@ function Sidebar() {
 
           .sidebar-link {
             flex: 0 0 auto;
-            min-width: 132px;
+            min-width: 104px;
             justify-content: center;
-            padding: 11px 13px;
+            padding: 10px 12px;
+            gap: 8px;
+            font-size: 12px;
           }
         }
 
@@ -302,8 +309,17 @@ function Sidebar() {
           }
 
           .sidebar-link {
-            min-width: 116px;
-            font-size: 12px;
+            min-width: 86px;
+            flex-direction: column;
+            gap: 5px;
+            padding: 9px 8px;
+            font-size: 10px;
+            letter-spacing: 0.04em;
+          }
+
+          .sidebar-link svg {
+            width: 17px;
+            height: 17px;
           }
         }
       `}</style>

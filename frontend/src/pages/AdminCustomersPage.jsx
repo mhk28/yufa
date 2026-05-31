@@ -212,9 +212,44 @@ function AdminCustomersPage() {
         }
 
         @media (max-width: 900px) {
-          .customer-grid,
           .customer-stat-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 9px;
+          }
+
+          .customer-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+          }
+
+          .customer-stat-card,
+          .customer-card,
+          .guest-panel {
+            padding: 14px;
+          }
+
+          .customer-stat-label {
+            font-size: 8px;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+          }
+
+          .customer-stat-value {
+            font-size: 24px;
+            overflow-wrap: anywhere;
+          }
+
+          .customer-name {
+            font-size: 21px;
+            line-height: 1.05;
+          }
+
+          .customer-email,
+          .customer-meta,
+          .guest-copy {
+            font-size: 11px;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
           }
         }
 
@@ -223,6 +258,30 @@ function AdminCustomersPage() {
           .customer-metrics {
             grid-template-columns: 1fr;
             flex-direction: column;
+            gap: 10px;
+          }
+
+          .customer-pill {
+            align-self: flex-start;
+            font-size: 8px;
+            padding: 5px 8px;
+          }
+
+          .metric-label {
+            font-size: 8px;
+            letter-spacing: 0.08em;
+          }
+
+          .metric-value {
+            font-size: 11px;
+            overflow-wrap: anywhere;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .customer-grid,
+          .customer-stat-grid {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
