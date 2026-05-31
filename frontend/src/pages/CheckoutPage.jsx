@@ -452,7 +452,7 @@ function CheckoutPage() {
                     id: "paynow",
                     name: "PayNow",
                     detail: "Manual transfer for now",
-                    logo: "/images/paynow.webp",
+                    logo: "/images/paynow.jpg",
                     className: "paynow",
                   },
                   {
