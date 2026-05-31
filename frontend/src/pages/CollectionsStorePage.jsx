@@ -169,10 +169,10 @@ function CollectionsStorePage() {
           max-width: 520px;
           margin: 22px 0 0;
           font-family: 'Jost', sans-serif;
-          font-size: 15px;
-          font-weight: 300;
-          line-height: 1.9;
-          color: rgba(45, 17, 85, 0.56);
+          font-size: 16px;
+          font-weight: 400;
+          line-height: 1.8;
+          color: rgba(45, 17, 85, 0.68);
         }
 
         .collection-search-input {
@@ -185,7 +185,7 @@ function CollectionsStorePage() {
           color: #1a0a2e;
           padding: 0 18px;
           font-family: 'Jost', sans-serif;
-          font-size: 12px;
+          font-size: 14px;
           outline: none;
         }
 
@@ -233,8 +233,8 @@ function CollectionsStorePage() {
           color: rgba(45, 17, 85, 0.62);
           background: rgba(255, 255, 255, 0.62);
           font-family: 'Jost', sans-serif;
-          font-size: 10px;
-          letter-spacing: 0.17em;
+          font-size: 11px;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           transition: all 0.2s ease;
         }
@@ -263,8 +263,8 @@ function CollectionsStorePage() {
 
         .discovery-label {
           font-family: 'Jost', sans-serif;
-          font-size: 9px;
-          letter-spacing: 0.2em;
+          font-size: 10px;
+          letter-spacing: 0.16em;
           text-transform: uppercase;
           color: rgba(45, 17, 85, 0.52);
         }
@@ -277,7 +277,7 @@ function CollectionsStorePage() {
           color: #1a0a2e;
           padding: 0 14px;
           font-family: 'Jost', sans-serif;
-          font-size: 13px;
+          font-size: 14px;
           outline: none;
         }
 
@@ -318,8 +318,8 @@ function CollectionsStorePage() {
           align-items: center;
           text-align: left;
           font-family: 'Jost', sans-serif;
-          font-size: 12px;
-          color: rgba(45, 17, 85, 0.52);
+          font-size: 14px;
+          color: rgba(45, 17, 85, 0.66);
         }
 
         .collection-results-bar strong {
@@ -429,8 +429,8 @@ function CollectionsStorePage() {
           }
 
           .collection-copy {
-            font-size: 14px;
-            line-height: 1.8;
+            font-size: 16px;
+            line-height: 1.7;
           }
 
           .collection-controls,
@@ -450,17 +450,24 @@ function CollectionsStorePage() {
           .collection-chip {
             min-height: 36px;
             padding: 0 12px;
-            font-size: 9px;
-            letter-spacing: 0.13em;
+            font-size: 10px;
+            letter-spacing: 0.08em;
           }
 
           .products-store-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px 9px;
           }
 
           .collection-results-bar {
             flex-direction: column;
             align-items: flex-start;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .products-store-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
           }
         }
       `}</style>

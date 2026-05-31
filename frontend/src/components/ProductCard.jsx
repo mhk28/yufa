@@ -113,6 +113,57 @@ function ProductCard({ product }) {
           font-size: 12px;
           color: rgba(45, 17, 85, 0.62);
         }
+
+        @media (max-width: 720px) {
+          .store-product-image-wrap {
+            aspect-ratio: 1 / 1.16;
+          }
+
+          .quick-view-cue {
+            display: none;
+          }
+
+          .store-product-info {
+            padding-top: 9px;
+          }
+
+          .store-product-category {
+            font-size: 8px;
+            line-height: 1.25;
+            letter-spacing: 0.08em;
+            margin-bottom: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+
+          .store-product-name {
+            font-size: clamp(15px, 4vw, 17px);
+            line-height: 1.08;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
+
+          .store-product-price {
+            margin-top: 6px;
+            font-size: 11px;
+            line-height: 1.25;
+            color: rgba(45, 17, 85, 0.72);
+          }
+        }
+
+        @media (max-width: 340px) {
+          .store-product-name {
+            font-size: 15px;
+          }
+
+          .store-product-price {
+            font-size: 10px;
+          }
+        }
       `}</style>
 
       <Link className="store-product-card" to={`/product/${product._id}`}>

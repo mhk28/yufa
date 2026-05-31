@@ -14,6 +14,7 @@ function HomePage() {
   const [products, setProducts] = useState([]);
   const [slides, setSlides] = useState([]);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [touchStartX, setTouchStartX] = useState(null);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -61,6 +62,22 @@ function HomePage() {
     if (slides.length <= 1) return;
     setActiveSlideIndex((currentIndex) => (currentIndex + 1) % slides.length);
   };
+  const retreatSlide = () => {
+    if (slides.length <= 1) return;
+    setActiveSlideIndex((currentIndex) => (currentIndex - 1 + slides.length) % slides.length);
+  };
+  const handleTouchEnd = (event) => {
+    if (touchStartX === null || slides.length <= 1) return;
+
+    const distance = touchStartX - event.changedTouches[0].clientX;
+
+    if (Math.abs(distance) > 42) {
+      if (distance > 0) advanceSlide();
+      else retreatSlide();
+    }
+
+    setTouchStartX(null);
+  };
 
   return (
     <>
@@ -106,10 +123,10 @@ function HomePage() {
           max-width: 510px;
           margin: 30px 0 36px;
           font-family: 'Jost', sans-serif;
-          font-size: 15px;
-          font-weight: 300;
-          line-height: 1.95;
-          color: rgba(45, 17, 85, 0.58);
+          font-size: 16px;
+          font-weight: 400;
+          line-height: 1.85;
+          color: rgba(45, 17, 85, 0.68);
         }
 
         .home-cta {
@@ -132,6 +149,7 @@ function HomePage() {
           min-height: 540px;
           background: #efe7df;
           overflow: hidden;
+          touch-action: pan-y;
         }
 
         .home-hero-media {
@@ -187,6 +205,42 @@ function HomePage() {
 
         .showcase-dot.active {
           background: #e8c96e;
+        }
+
+        .showcase-arrow {
+          position: absolute;
+          top: 50%;
+          z-index: 3;
+          width: 46px;
+          height: 46px;
+          border: 1px solid rgba(255, 255, 255, 0.48);
+          border-radius: 50%;
+          background: rgba(26, 10, 46, 0.26);
+          color: #fff;
+          font-family: 'Jost', sans-serif;
+          font-size: 26px;
+          line-height: 1;
+          cursor: pointer;
+          transform: translateY(-50%);
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          backdrop-filter: blur(8px);
+          transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .showcase-arrow:hover {
+          background: rgba(45, 17, 85, 0.58);
+          border-color: #e8c96e;
+          transform: translateY(-50%) scale(1.04);
+        }
+
+        .showcase-arrow.prev {
+          left: 18px;
+        }
+
+        .showcase-arrow.next {
+          right: 18px;
         }
 
         @keyframes showcaseFade {
@@ -323,8 +377,8 @@ function HomePage() {
           }
 
           .home-copy {
-            font-size: 14px;
-            line-height: 1.8;
+            font-size: 16px;
+            line-height: 1.75;
             margin: 24px 0 30px;
           }
 
@@ -335,6 +389,20 @@ function HomePage() {
 
           .home-hero-showcase {
             min-height: 360px;
+          }
+
+          .showcase-arrow {
+            width: 40px;
+            height: 40px;
+            font-size: 22px;
+          }
+
+          .showcase-arrow.prev {
+            left: 12px;
+          }
+
+          .showcase-arrow.next {
+            right: 12px;
           }
 
           .collection-feature-card {
@@ -360,19 +428,31 @@ function HomePage() {
               Explore Collections
             </Link>
           </div>
-          <div className="home-hero-showcase">
+          <div
+            className="home-hero-showcase"
+            onTouchStart={(event) => setTouchStartX(event.touches[0].clientX)}
+            onTouchEnd={handleTouchEnd}
+          >
             {slides.length > 1 && (
-              <div className="showcase-dots">
-                {slides.map((slide, index) => (
-                  <button
-                    className={`showcase-dot ${index === activeSlideIndex ? "active" : ""}`}
-                    type="button"
-                    key={slide._id}
-                    aria-label={`Show slide ${index + 1}`}
-                    onClick={() => setActiveSlideIndex(index)}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="showcase-dots">
+                  {slides.map((slide, index) => (
+                    <button
+                      className={`showcase-dot ${index === activeSlideIndex ? "active" : ""}`}
+                      type="button"
+                      key={slide._id}
+                      aria-label={`Show slide ${index + 1}`}
+                      onClick={() => setActiveSlideIndex(index)}
+                    />
+                  ))}
+                </div>
+                <button className="showcase-arrow prev" type="button" aria-label="Previous showcase slide" onClick={retreatSlide}>
+                  &lsaquo;
+                </button>
+                <button className="showcase-arrow next" type="button" aria-label="Next showcase slide" onClick={advanceSlide}>
+                  &rsaquo;
+                </button>
+              </>
             )}
 
             {activeSlide?.mediaType === "video" ? (
