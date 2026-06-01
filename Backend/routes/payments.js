@@ -7,6 +7,8 @@ const { sendOrderEmails } = require("../utils/emailService");
 
 const router = express.Router();
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+const LOCAL_DELIVERY_FEE = 5;
+const FREE_DELIVERY_THRESHOLD = 100;
 
 const getStoreUrl = () => {
   const urls = (process.env.CLIENT_URL || "http://localhost:5173")
@@ -42,6 +44,17 @@ const notifyPaidOrder = async (order) => {
   }
 };
 
+const getShippingFee = (shippingMethod, subtotal) => {
+  if (shippingMethod === "pickup") return 0;
+  return Number(subtotal) >= FREE_DELIVERY_THRESHOLD ? 0 : LOCAL_DELIVERY_FEE;
+};
+
+const getShippingLabel = (shippingMethod, shippingFee) => {
+  if (shippingMethod === "pickup") return "Self-collection / Pickup";
+  if (shippingFee === 0) return "Local delivery (free)";
+  return "Local delivery";
+};
+
 const markCheckoutSessionPaid = async (session) => {
   const orderId = session.metadata?.orderId;
 
@@ -66,13 +79,15 @@ router.post("/create-checkout-session", async (req, res) => {
       return res.status(500).json({ message: "Stripe is not configured." });
     }
 
-    const { customerInfo, items, subtotal, shipping } = req.body;
+    const { customerInfo, items, subtotal, shippingMethod = "local_delivery" } = req.body;
 
     if (!items?.length) {
       return res.status(400).json({ message: "Checkout requires at least one item." });
     }
 
-    const total = Number(subtotal) + Number(shipping || 0);
+    const normalizedSubtotal = Number(subtotal) || 0;
+    const shipping = getShippingFee(shippingMethod, normalizedSubtotal);
+    const total = normalizedSubtotal + shipping;
 
     if (!Number.isFinite(total) || total <= 0) {
       return res.status(400).json({ message: "Checkout total must be greater than zero." });
@@ -89,8 +104,9 @@ router.post("/create-checkout-session", async (req, res) => {
       customer: customer?.id,
       customerInfo,
       items,
-      subtotal: Number(subtotal) || 0,
-      shipping: Number(shipping) || 0,
+      subtotal: normalizedSubtotal,
+      shipping,
+      shippingMethod,
       paymentMethod: "stripe",
       paymentStatus: "pending",
       orderStatus: "received",
@@ -100,19 +116,36 @@ router.post("/create-checkout-session", async (req, res) => {
       mode: "payment",
       payment_method_types: ["card", "paynow"],
       customer_email: customerInfo?.email || undefined,
-      line_items: items.map((item) => ({
-        quantity: Number(item.quantity) || 1,
-        price_data: {
-          currency: "sgd",
-          unit_amount: Math.round((Number(item.price) || 0) * 100),
-          product_data: {
-            name: item.variantLabel ? `${item.name} (${item.variantLabel})` : item.name,
-            images: item.image?.startsWith("http") ? [item.image] : undefined,
+      line_items: [
+        ...items.map((item) => ({
+          quantity: Number(item.quantity) || 1,
+          price_data: {
+            currency: "sgd",
+            unit_amount: Math.round((Number(item.price) || 0) * 100),
+            product_data: {
+              name: item.variantLabel ? `${item.name} (${item.variantLabel})` : item.name,
+              images: item.image?.startsWith("http") ? [item.image] : undefined,
+            },
           },
-        },
-      })),
+        })),
+        ...(shipping > 0
+          ? [
+              {
+                quantity: 1,
+                price_data: {
+                  currency: "sgd",
+                  unit_amount: Math.round(shipping * 100),
+                  product_data: {
+                    name: getShippingLabel(shippingMethod, shipping),
+                  },
+                },
+              },
+            ]
+          : []),
+      ],
       metadata: {
         orderId: String(order._id),
+        shippingMethod,
       },
       success_url: `${getStoreUrl()}/checkout/success?order=${order._id}`,
       cancel_url: `${getStoreUrl()}/checkout/cancel?order=${order._id}`,

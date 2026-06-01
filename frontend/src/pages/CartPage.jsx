@@ -331,7 +331,7 @@ function CartPage() {
                   </div>
                   <div className="summary-row">
                     <span>Shipping</span>
-                    <span>Confirmed after order</span>
+                    <span>$5 delivery or free pickup</span>
                   </div>
                   <div className="summary-row">
                     <span>Total</span>

@@ -33,6 +33,9 @@ const formatDate = (value) =>
 
 const getOrderNumber = (order) => String(order._id).slice(-6).toUpperCase();
 
+const getShippingMethodLabel = (method = "") =>
+  method === "pickup" ? "Self-collection / Pickup" : "Local delivery";
+
 const getOrderHtml = (order, heading, intro) => {
   const orderNumber = getOrderNumber(order);
   const subtotal = Number(order.subtotal) || 0;
@@ -114,8 +117,8 @@ const getOrderHtml = (order, heading, intro) => {
                         <td align="right" style="padding:6px 0;font-family:Arial,sans-serif;font-size:14px;color:#1a0a2e;">${formatCurrency(subtotal)}</td>
                       </tr>
                       <tr>
-                        <td style="padding:6px 0;font-family:Arial,sans-serif;font-size:14px;color:#6f6281;">Shipping</td>
-                        <td align="right" style="padding:6px 0;font-family:Arial,sans-serif;font-size:14px;color:#1a0a2e;">${shipping ? formatCurrency(shipping) : "To be confirmed"}</td>
+                        <td style="padding:6px 0;font-family:Arial,sans-serif;font-size:14px;color:#6f6281;">${getShippingMethodLabel(order.shippingMethod)}</td>
+                        <td align="right" style="padding:6px 0;font-family:Arial,sans-serif;font-size:14px;color:#1a0a2e;">${shipping ? formatCurrency(shipping) : "Free"}</td>
                       </tr>
                       <tr>
                         <td style="padding:14px 0 4px;border-top:1px solid #eadfca;font-family:Georgia,'Times New Roman',serif;font-size:22px;color:#2d1155;">Total</td>
@@ -139,7 +142,7 @@ const getOrderHtml = (order, heading, intro) => {
                         </td>
                         <td width="16" style="font-size:0;line-height:0;">&nbsp;</td>
                         <td width="50%" valign="top" style="padding:18px;background:#fbf8f3;border:1px solid #eadfca;">
-                          <div style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#8b789d;">Delivery</div>
+                          <div style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#8b789d;">${getShippingMethodLabel(order.shippingMethod)}</div>
                           <p style="margin:10px 0 0;font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:#1a0a2e;">
                             ${escapeHtml(order.customerInfo?.address || "No address provided")}
                           </p>

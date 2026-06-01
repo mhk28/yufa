@@ -39,6 +39,17 @@ If a product is removed from showcase in the product page, it also stops showing
 
 Payment status is updated automatically when Stripe confirms payment through the webhook.
 
+## Shipping
+
+Checkout supports two launch-ready shipping options:
+
+- Local delivery: $5
+- Self-collection / Pickup: $0
+
+Local delivery becomes free when the order subtotal is $100 or above.
+
+The system stores the selected shipping method on the order and charges the delivery fee through Stripe. Actual delivery fulfilment is handled manually by the admin after reviewing the order details.
+
 ## Customers
 
 Go to `Admin > Customers` to view customer accounts and order activity.

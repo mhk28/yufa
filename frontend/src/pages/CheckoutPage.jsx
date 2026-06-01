@@ -8,6 +8,8 @@ import { API_BASE_URL, formatCurrency } from "../utils/storefront";
 function CheckoutPage() {
   const { items, subtotal } = useCart();
   const { token, isAuthenticated, user } = useCustomerAuth();
+  const LOCAL_DELIVERY_FEE = 5;
+  const FREE_DELIVERY_THRESHOLD = 100;
   const [customerInfo, setCustomerInfo] = useState({
     firstName: user?.name?.split(" ")[0] || "",
     lastName: user?.name?.split(" ").slice(1).join(" ") || "",
@@ -15,8 +17,11 @@ function CheckoutPage() {
     phone: "",
     address: "",
   });
+  const [shippingMethod, setShippingMethod] = useState("local_delivery");
   const [error, setError] = useState("");
   const [placing, setPlacing] = useState(false);
+  const shipping = shippingMethod === "pickup" || subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : LOCAL_DELIVERY_FEE;
+  const total = subtotal + shipping;
 
   const updateField = (field, value) => {
     setCustomerInfo((currentInfo) => ({ ...currentInfo, [field]: value }));
@@ -24,6 +29,17 @@ function CheckoutPage() {
 
   const handlePlaceOrder = async () => {
     setError("");
+
+    if (!customerInfo.firstName || !customerInfo.email || !customerInfo.phone) {
+      setError("Please enter your name, email, and phone number.");
+      return;
+    }
+
+    if (shippingMethod === "local_delivery" && !customerInfo.address.trim()) {
+      setError("Please enter a delivery address or choose self-collection.");
+      return;
+    }
+
     setPlacing(true);
 
     try {
@@ -37,7 +53,7 @@ function CheckoutPage() {
           customerInfo,
           items,
           subtotal,
-          shipping: 0,
+          shippingMethod,
         }),
       });
 
@@ -109,6 +125,47 @@ function CheckoutPage() {
 
         .payment-section-title {
           margin-top: 34px;
+        }
+
+        .shipping-options {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+          margin-top: 12px;
+        }
+
+        .shipping-option {
+          padding: 18px;
+          border: 1px solid rgba(201, 168, 76, 0.2);
+          background: #fdfcfb;
+          color: #1a0a2e;
+          text-align: left;
+          cursor: pointer;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .shipping-option.active {
+          border-color: #c9a84c;
+          box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
+        }
+
+        .shipping-name {
+          display: block;
+          font-family: 'Jost', sans-serif;
+          font-size: 12px;
+          font-weight: 500;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: #1a0a2e;
+        }
+
+        .shipping-detail {
+          display: block;
+          margin-top: 8px;
+          font-family: 'Jost', sans-serif;
+          font-size: 12px;
+          line-height: 1.55;
+          color: rgba(45, 17, 85, 0.52);
         }
 
         .checkout-grid {
@@ -360,6 +417,10 @@ function CheckoutPage() {
             gap: 6px;
           }
 
+          .shipping-options {
+            grid-template-columns: 1fr;
+          }
+
           .accepted-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
           }
@@ -431,6 +492,30 @@ function CheckoutPage() {
                 </div>
               </div>
 
+              <h2 className="checkout-section-title payment-section-title">Shipping</h2>
+              <div className="shipping-options" aria-label="Shipping methods">
+                <button
+                  className={`shipping-option ${shippingMethod === "local_delivery" ? "active" : ""}`}
+                  type="button"
+                  onClick={() => setShippingMethod("local_delivery")}
+                >
+                  <span className="shipping-name">Local Delivery</span>
+                  <span className="shipping-detail">
+                    {subtotal >= FREE_DELIVERY_THRESHOLD
+                      ? `Free above ${formatCurrency(FREE_DELIVERY_THRESHOLD)}`
+                      : `${formatCurrency(LOCAL_DELIVERY_FEE)} Singapore local delivery`}
+                  </span>
+                </button>
+                <button
+                  className={`shipping-option ${shippingMethod === "pickup" ? "active" : ""}`}
+                  type="button"
+                  onClick={() => setShippingMethod("pickup")}
+                >
+                  <span className="shipping-name">Self-collection</span>
+                  <span className="shipping-detail">No delivery fee. Collection details can be arranged after order confirmation.</span>
+                </button>
+              </div>
+
               <h2 className="checkout-section-title payment-section-title">Payment</h2>
               <div className="accepted-payments" aria-label="Accepted payment methods">
                 <div className="accepted-heading">
@@ -495,8 +580,16 @@ function CheckoutPage() {
                 ))
               )}
               <div className="summary-total-row">
+                <span>Subtotal</span>
+                <span>{formatCurrency(subtotal)}</span>
+              </div>
+              <div className="summary-total-row">
+                <span>{shippingMethod === "pickup" ? "Self-collection" : "Shipping"}</span>
+                <span>{shipping === 0 ? "Free" : formatCurrency(shipping)}</span>
+              </div>
+              <div className="summary-total-row">
                 <span>Total</span>
-                <span className="summary-total-value">{formatCurrency(subtotal)}</span>
+                <span className="summary-total-value">{formatCurrency(total)}</span>
               </div>
               <button
                 className="place-order-button"

@@ -7,6 +7,8 @@ function AdminOrderDetailPage() {
   const { id } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const getShippingMethodLabel = (method = "") =>
+    method === "pickup" ? "Self-collection / Pickup" : "Local delivery";
 
   const fetchOrder = async () => {
     setLoading(true);
@@ -180,6 +182,7 @@ function AdminOrderDetailPage() {
                 <h2 className="panel-heading">Operations</h2>
                 <p className="detail-line">Payment: {order.paymentStatus}</p>
                 <p className="detail-line">Method: {order.paymentMethod}</p>
+                <p className="detail-line">Shipping: {getShippingMethodLabel(order.shippingMethod)} ({order.shipping ? formatCurrency(order.shipping) : "Free"})</p>
                 <label className="detail-line">
                   Fulfilment status
                   <select className="status-select" value={order.orderStatus} onChange={(e) => updateStatus(e.target.value)}>

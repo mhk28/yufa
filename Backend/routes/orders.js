@@ -5,8 +5,14 @@ const authMiddleware = require("../middleware/auth");
 const { sendOrderEmails } = require("../utils/emailService");
 
 const router = express.Router();
+const LOCAL_DELIVERY_FEE = 5;
+const FREE_DELIVERY_THRESHOLD = 100;
 
 const isAdmin = (req) => req.user?.role === "admin";
+const getShippingFee = (shippingMethod, subtotal) => {
+  if (shippingMethod === "pickup") return 0;
+  return Number(subtotal) >= FREE_DELIVERY_THRESHOLD ? 0 : LOCAL_DELIVERY_FEE;
+};
 
 const notifyOrderCreated = async (order) => {
   try {
@@ -22,7 +28,7 @@ const notifyOrderCreated = async (order) => {
 
 router.post("/", async (req, res) => {
   try {
-    const { customerInfo, items, subtotal, shipping, paymentMethod } = req.body;
+    const { customerInfo, items, subtotal, shippingMethod = "local_delivery", paymentMethod } = req.body;
 
     if (!items?.length) {
       return res.status(400).json({ message: "Order requires at least one item." });
@@ -32,7 +38,8 @@ router.post("/", async (req, res) => {
       customerInfo,
       items,
       subtotal: Number(subtotal) || 0,
-      shipping: Number(shipping) || 0,
+      shipping: getShippingFee(shippingMethod, Number(subtotal) || 0),
+      shippingMethod,
       paymentMethod: paymentMethod || "pending",
     });
 
@@ -51,7 +58,7 @@ router.post("/customer", authMiddleware, async (req, res) => {
       return res.status(403).json({ message: "Customer access required." });
     }
 
-    const { customerInfo, items, subtotal, shipping, paymentMethod } = req.body;
+    const { customerInfo, items, subtotal, shippingMethod = "local_delivery", paymentMethod } = req.body;
 
     if (!items?.length) {
       return res.status(400).json({ message: "Order requires at least one item." });
@@ -62,7 +69,8 @@ router.post("/customer", authMiddleware, async (req, res) => {
       customerInfo,
       items,
       subtotal: Number(subtotal) || 0,
-      shipping: Number(shipping) || 0,
+      shipping: getShippingFee(shippingMethod, Number(subtotal) || 0),
+      shippingMethod,
       paymentMethod: paymentMethod || "pending",
     });
 

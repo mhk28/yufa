@@ -45,6 +45,10 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    shippingMethod: {
+      type: String,
+      default: "local_delivery",
+    },
     paymentMethod: {
       type: String,
       default: "pending",
