@@ -31,6 +31,9 @@ function AddProductPage() {
   const selectedSubcategory = selectedCategory?.subcategories.find(
     (option) => option.name === subcategory
   );
+  const preventNumberWheel = (event) => {
+    event.currentTarget.blur();
+  };
 
   useEffect(() => {
     previewsRef.current = previews;
@@ -791,6 +794,7 @@ gap: 32px;
                     step="0.01"
                     placeholder="e.g. 39.90"
                     value={basePrice}
+                    onWheel={preventNumberWheel}
                     onChange={(e) => setBasePrice(e.target.value)}
                   />
                 </div>
@@ -804,6 +808,7 @@ gap: 32px;
                       step="0.01"
                       placeholder="e.g. 29.90"
                       value={salePrice}
+                      onWheel={preventNumberWheel}
                       onChange={(e) => setSalePrice(e.target.value)}
                     />
                   </div>
@@ -847,6 +852,7 @@ gap: 32px;
                           step={field === "price" ? "0.01" : undefined}
                           placeholder={field}
                           value={variant[field]}
+                          onWheel={field === "price" || field === "stock" ? preventNumberWheel : undefined}
                           onChange={(e) => updateVariant(index, field, e.target.value)}
                         />
                       ))}

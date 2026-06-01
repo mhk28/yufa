@@ -1,9 +1,37 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { getProductCollectionLabel } from "../data/catalogueOptions";
 import { formatCurrency, getImageUrl, getProductOriginalPrice, getProductPriceLabel } from "../utils/storefront";
 
 function ProductCard({ product }) {
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const originalPrice = getProductOriginalPrice(product);
+  const galleryImages = [...new Set([product.image, product.showcaseImage, ...(product.images || [])].filter(Boolean))];
+  const activeImage = galleryImages[activeImageIndex] || product.image;
+  const hasGallery = galleryImages.length > 1;
+
+  const showPreviousImage = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setActiveImageIndex((currentIndex) =>
+      currentIndex === 0 ? galleryImages.length - 1 : currentIndex - 1
+    );
+  };
+
+  const showNextImage = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setActiveImageIndex((currentIndex) =>
+      currentIndex === galleryImages.length - 1 ? 0 : currentIndex + 1
+    );
+  };
+
+  const previewNextImage = () => {
+    if (!hasGallery) return;
+    setActiveImageIndex((currentIndex) =>
+      currentIndex === galleryImages.length - 1 ? 0 : currentIndex + 1
+    );
+  };
 
   return (
     <>
@@ -72,6 +100,65 @@ function ProductCard({ product }) {
         .store-product-card:hover .quick-view-cue {
           opacity: 1;
           transform: translateY(0);
+        }
+
+        .product-card-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 34px;
+          height: 34px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid rgba(255, 255, 255, 0.58);
+          border-radius: 50%;
+          background: rgba(26, 10, 46, 0.42);
+          color: #fff;
+          cursor: pointer;
+          z-index: 4;
+          opacity: 0;
+          transition: opacity 0.2s ease, background 0.2s ease;
+        }
+
+        .store-product-card:hover .product-card-arrow,
+        .product-card-arrow:focus-visible {
+          opacity: 1;
+        }
+
+        .product-card-arrow.prev {
+          left: 10px;
+        }
+
+        .product-card-arrow.next {
+          right: 10px;
+        }
+
+        .product-card-dots {
+          position: absolute;
+          left: 50%;
+          bottom: 62px;
+          transform: translateX(-50%);
+          display: inline-flex;
+          gap: 5px;
+          z-index: 4;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        }
+
+        .store-product-card:hover .product-card-dots {
+          opacity: 1;
+        }
+
+        .product-card-dot {
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.62);
+        }
+
+        .product-card-dot.active {
+          background: #e8c96e;
         }
 
         .store-product-placeholder {
@@ -156,6 +243,19 @@ function ProductCard({ product }) {
             display: none;
           }
 
+          .product-card-arrow,
+          .store-product-card:hover .product-card-arrow {
+            opacity: 1;
+            width: 30px;
+            height: 30px;
+          }
+
+          .product-card-dots,
+          .store-product-card:hover .product-card-dots {
+            opacity: 1;
+            bottom: 10px;
+          }
+
           .store-product-info {
             padding-top: 9px;
           }
@@ -199,14 +299,36 @@ function ProductCard({ product }) {
         }
       `}</style>
 
-      <Link className="store-product-card" to={`/product/${product._id}`}>
+      <Link
+        className="store-product-card"
+        to={`/product/${product._id}`}
+        onMouseEnter={previewNextImage}
+      >
         <div className="store-product-image-wrap">
-          {product.image ? (
-            <img className="store-product-image" src={getImageUrl(product.image)} alt={product.name} />
+          {activeImage ? (
+            <img className="store-product-image" src={getImageUrl(activeImage)} alt={product.name} />
           ) : (
           <div className="store-product-placeholder">Yufa</div>
           )}
           {product.isOnSale && originalPrice > 0 && <span className="store-sale-badge">Sale</span>}
+          {hasGallery && (
+            <>
+              <button className="product-card-arrow prev" type="button" onClick={showPreviousImage} aria-label="Previous product image">
+                ‹
+              </button>
+              <button className="product-card-arrow next" type="button" onClick={showNextImage} aria-label="Next product image">
+                ›
+              </button>
+              <span className="product-card-dots" aria-hidden="true">
+                {galleryImages.map((image, index) => (
+                  <span
+                    className={`product-card-dot ${activeImageIndex === index ? "active" : ""}`}
+                    key={`${image}-${index}`}
+                  />
+                ))}
+              </span>
+            </>
+          )}
           <span className="quick-view-cue">View Piece</span>
         </div>
         <div className="store-product-info">

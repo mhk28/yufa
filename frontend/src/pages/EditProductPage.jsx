@@ -35,6 +35,9 @@ function EditProductPage() {
   const selectedSubcategory = selectedCategory?.subcategories.find(
     (option) => option.name === subcategory
   );
+  const preventNumberWheel = (event) => {
+    event.currentTarget.blur();
+  };
   const galleryImages = [
     ...existingImages.map((imageUrl) => ({
       type: "existing",
@@ -931,6 +934,7 @@ align-items: center;
                       min="0"
                       step="0.01"
                       value={basePrice}
+                      onWheel={preventNumberWheel}
                       onChange={(e) => setBasePrice(e.target.value)}
                     />
                   </div>
@@ -943,6 +947,7 @@ align-items: center;
                         min="0"
                         step="0.01"
                         value={salePrice}
+                        onWheel={preventNumberWheel}
                         onChange={(e) => setSalePrice(e.target.value)}
                       />
                     </div>
@@ -986,6 +991,7 @@ align-items: center;
                             step={field === "price" ? "0.01" : undefined}
                             placeholder={field}
                             value={variant[field] || ""}
+                            onWheel={field === "price" || field === "stock" ? preventNumberWheel : undefined}
                             onChange={(e) => updateVariant(index, field, e.target.value)}
                           />
                         ))}

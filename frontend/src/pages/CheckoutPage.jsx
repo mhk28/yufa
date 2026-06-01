@@ -6,7 +6,7 @@ import { useCustomerAuth } from "../context/CustomerAuthContext";
 import { API_BASE_URL, formatCurrency } from "../utils/storefront";
 
 function CheckoutPage() {
-  const { items, subtotal } = useCart();
+  const { items, subtotal, removeItem, updateQuantity } = useCart();
   const { token, isAuthenticated, user } = useCustomerAuth();
   const LOCAL_DELIVERY_FEE = 5;
   const FREE_DELIVERY_THRESHOLD = 100;
@@ -346,6 +346,73 @@ function CheckoutPage() {
           color: rgba(45, 17, 85, 0.62);
         }
 
+        .summary-item {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .summary-item-top {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          gap: 14px;
+        }
+
+        .summary-item-name {
+          color: #1a0a2e;
+          line-height: 1.45;
+        }
+
+        .summary-item-price {
+          color: #2d1155;
+          font-weight: 500;
+          white-space: nowrap;
+        }
+
+        .summary-controls {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-top: 10px;
+        }
+
+        .summary-quantity {
+          display: inline-flex;
+          align-items: center;
+          border: 1px solid rgba(201, 168, 76, 0.22);
+        }
+
+        .summary-quantity button,
+        .summary-quantity span {
+          width: 30px;
+          height: 30px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: none;
+          background: transparent;
+          color: #2d1155;
+          font-family: 'Jost', sans-serif;
+          font-size: 12px;
+        }
+
+        .summary-quantity button {
+          cursor: pointer;
+        }
+
+        .summary-remove {
+          border: none;
+          background: transparent;
+          color: #c0392b;
+          cursor: pointer;
+          font-family: 'Jost', sans-serif;
+          font-size: 10px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+
         .summary-total-row {
           align-items: baseline;
         }
@@ -574,8 +641,37 @@ function CheckoutPage() {
               ) : (
                 items.map((item) => (
                   <div className="summary-item" key={`${item.productId}-${item.variantKey || "base"}`}>
-                    <span>{item.name} x {item.quantity}</span>
-                    <span>{formatCurrency(item.price * item.quantity)}</span>
+                    <div className="summary-item-top">
+                      <span className="summary-item-name">
+                        {item.name}
+                        {item.variantLabel ? ` (${item.variantLabel})` : ""}
+                      </span>
+                      <span className="summary-item-price">{formatCurrency(item.price * item.quantity)}</span>
+                    </div>
+                    <div className="summary-controls">
+                      <div className="summary-quantity" aria-label={`Quantity for ${item.name}`}>
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(item.productId, item.variantKey, item.quantity - 1)}
+                        >
+                          -
+                        </button>
+                        <span>{item.quantity}</span>
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(item.productId, item.variantKey, item.quantity + 1)}
+                        >
+                          +
+                        </button>
+                      </div>
+                      <button
+                        className="summary-remove"
+                        type="button"
+                        onClick={() => removeItem(item.productId, item.variantKey)}
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 ))
               )}
