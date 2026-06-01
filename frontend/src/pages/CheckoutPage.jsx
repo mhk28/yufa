@@ -218,16 +218,17 @@ function CheckoutPage() {
         }
 
         .payment-option {
-          display: flex;
+          display: grid;
+          grid-template-columns: 1fr auto;
           align-items: center;
-          justify-content: space-between;
           gap: 14px;
-          min-height: 76px;
-          padding: 14px;
+          min-height: 88px;
+          padding: 16px;
           border: 1px solid rgba(201, 168, 76, 0.18);
           background: #fdfcfb;
           color: #1a0a2e;
           cursor: pointer;
+          text-align: left;
           transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
         }
 
@@ -244,21 +245,29 @@ function CheckoutPage() {
         .payment-copy {
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 6px;
+          min-width: 0;
+          align-items: flex-start;
+          text-align: left;
         }
 
         .payment-name {
           font-family: 'Jost', sans-serif;
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 500;
-          letter-spacing: 0.16em;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
+          color: #1a0a2e;
+          line-height: 1.2;
+          text-align: left;
         }
 
         .payment-detail {
           font-family: 'Jost', sans-serif;
           font-size: 12px;
           color: rgba(45, 17, 85, 0.48);
+          line-height: 1.35;
+          text-align: left;
         }
 
         .payment-logo {
@@ -378,6 +387,11 @@ function CheckoutPage() {
 
           .payment-options {
             grid-template-columns: 1fr;
+          }
+
+          .payment-option {
+            min-height: 78px;
+            padding: 14px;
           }
         }
       `}</style>
