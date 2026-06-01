@@ -331,7 +331,7 @@ function CartPage() {
                   </div>
                   <div className="summary-row">
                     <span>Shipping</span>
-                    <span>Calculated later</span>
+                    <span>Confirmed after order</span>
                   </div>
                   <div className="summary-row">
                     <span>Total</span>

@@ -7,6 +7,7 @@ import {
 import { CartProvider } from "./context/CartContext";
 import { CustomerAuthProvider } from "./context/CustomerAuthContext";
 import ScrollToTop from "./components/ScrollToTop";
+import AdminRoute from "./components/AdminRoute";
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import CollectionsStorePage from "./pages/CollectionsStorePage";
@@ -117,52 +118,52 @@ function App() {
 
         <Route
           path="/admin"
-          element={<DashboardPage />}
+          element={<AdminRoute><DashboardPage /></AdminRoute>}
         />
 
         <Route
           path="/admin/dashboard"
-          element={<DashboardPage />}
+          element={<AdminRoute><DashboardPage /></AdminRoute>}
         />
 
         <Route
           path="/admin/products"
-          element={<ProductsPage />}
+          element={<AdminRoute><ProductsPage /></AdminRoute>}
         />
 
         <Route
           path="/admin/categories"
-          element={<CategoriesPage />}
+          element={<AdminRoute><CategoriesPage /></AdminRoute>}
         />
 
         <Route
           path="/admin/showcase"
-          element={<ShowcasePage />}
+          element={<AdminRoute><ShowcasePage /></AdminRoute>}
         />
 
         <Route
           path="/admin/add-product"
-          element={<AddProductPage />}
+          element={<AdminRoute><AddProductPage /></AdminRoute>}
         />
 
         <Route
           path="/admin/edit-product/:id"
-          element={<EditProductPage />}
+          element={<AdminRoute><EditProductPage /></AdminRoute>}
         />
 
         <Route
           path="/admin/orders"
-          element={<AdminOrdersPage />}
+          element={<AdminRoute><AdminOrdersPage /></AdminRoute>}
         />
 
         <Route
           path="/admin/orders/:id"
-          element={<AdminOrderDetailPage />}
+          element={<AdminRoute><AdminOrderDetailPage /></AdminRoute>}
         />
 
         <Route
           path="/admin/customers"
-          element={<AdminCustomersPage />}
+          element={<AdminRoute><AdminCustomersPage /></AdminRoute>}
         />
 
       </Routes>

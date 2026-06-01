@@ -26,6 +26,12 @@ function CheckoutPage() {
 
   const handlePlaceOrder = async () => {
     setError("");
+
+    if (paymentMethod !== "stripe") {
+      setError("This payment method is not enabled yet. Please use Stripe Checkout for now.");
+      return;
+    }
+
     setPlacing(true);
 
     try {
@@ -242,6 +248,17 @@ function CheckoutPage() {
           box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
         }
 
+        .payment-option.disabled {
+          cursor: not-allowed;
+          opacity: 0.62;
+          background: rgba(253, 252, 251, 0.68);
+        }
+
+        .payment-option.disabled:hover {
+          border-color: rgba(201, 168, 76, 0.18);
+          transform: none;
+        }
+
         .payment-copy {
           display: flex;
           flex-direction: column;
@@ -268,6 +285,24 @@ function CheckoutPage() {
           color: rgba(45, 17, 85, 0.48);
           line-height: 1.35;
           text-align: left;
+        }
+
+        .payment-status {
+          width: fit-content;
+          margin-top: 2px;
+          padding: 4px 8px;
+          border: 1px solid rgba(201, 168, 76, 0.22);
+          border-radius: 999px;
+          font-family: 'Jost', sans-serif;
+          font-size: 9px;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: rgba(45, 17, 85, 0.58);
+        }
+
+        .payment-status.live {
+          border-color: rgba(39, 174, 96, 0.22);
+          color: #2d6f45;
         }
 
         .payment-logo {
@@ -463,41 +498,60 @@ function CheckoutPage() {
                   {
                     id: "stripe",
                     name: "Stripe Checkout",
-                    detail: "Cards and supported wallets",
+                    detail: "Cards, PayNow, and eligible wallets",
                     logo: "/images/stripe.png",
                     className: "",
+                    status: "Active",
+                    enabled: true,
                   },
                   {
                     id: "paynow",
                     name: "PayNow",
-                    detail: "Manual transfer for now",
+                    detail: "Shown by Stripe when eligible",
                     logo: "/images/paynow.jpg",
                     className: "paynow",
+                    status: "Via Stripe",
+                    enabled: false,
                   },
                   {
                     id: "card",
                     name: "Cards",
-                    detail: "Visa, Mastercard later",
+                    detail: "Handled inside Stripe Checkout",
                     logo: "/images/visa-mastercard.jpg",
                     className: "card",
+                    status: "Via Stripe",
+                    enabled: false,
                   },
                   {
                     id: "apple_pay",
                     name: "Apple Pay",
-                    detail: "Via Stripe later",
+                    detail: "Shown on eligible Apple devices",
                     logo: "/images/apple-pay.png",
                     className: "apple",
+                    status: "Via Stripe",
+                    enabled: false,
+                  },
+                  {
+                    id: "google_pay",
+                    name: "Google Pay",
+                    detail: "Shown on eligible Android or Chrome devices",
+                    logo: "/images/google-pay.png",
+                    className: "google",
+                    status: "Via Stripe",
+                    enabled: false,
                   },
                 ].map((method) => (
                   <button
                     key={method.id}
-                    className={`payment-option ${paymentMethod === method.id ? "active" : ""}`}
+                    className={`payment-option ${paymentMethod === method.id ? "active" : ""} ${method.enabled ? "" : "disabled"}`}
                     type="button"
+                    disabled={!method.enabled}
                     onClick={() => setPaymentMethod(method.id)}
                   >
                     <span className="payment-copy">
                       <span className="payment-name">{method.name}</span>
                       <span className="payment-detail">{method.detail}</span>
+                      <span className={`payment-status ${method.enabled ? "live" : ""}`}>{method.status}</span>
                     </span>
                     <span className={`payment-logo ${method.className}`}>
                       <img src={method.logo} alt={`${method.name} logo`} />
@@ -507,8 +561,9 @@ function CheckoutPage() {
               </div>
 
               <div className="payment-note">
-                Stripe opens a secure hosted checkout in test mode. PayNow is kept as a manual option
-                until the business is ready to accept non-card payments.
+                Stripe Checkout is the active payment route. Cards, PayNow, Apple Pay, and Google Pay appear on
+                Stripe's hosted checkout page when they are enabled, eligible for SGD, and supported by the
+                customer's device or browser.
               </div>
               {error && <div className="checkout-error">{error}</div>}
             </div>

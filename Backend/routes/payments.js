@@ -42,6 +42,24 @@ const notifyPaidOrder = async (order) => {
   }
 };
 
+const markCheckoutSessionPaid = async (session) => {
+  const orderId = session.metadata?.orderId;
+
+  if (!orderId) return;
+
+  const order = await Order.findById(orderId);
+
+  if (order && order.paymentStatus !== "paid") {
+    order.paymentStatus = "paid";
+    order.orderStatus = "paid";
+    order.stripeSessionId = session.id;
+    order.stripePaymentIntentId = session.payment_intent;
+    order.paidAt = new Date();
+    await order.save();
+    notifyPaidOrder(order);
+  }
+};
+
 router.post("/create-checkout-session", async (req, res) => {
   try {
     if (!stripe) {
@@ -80,7 +98,9 @@ router.post("/create-checkout-session", async (req, res) => {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card"],
+      automatic_payment_methods: {
+        enabled: true,
+      },
       customer_email: customerInfo?.email || undefined,
       line_items: items.map((item) => ({
         quantity: Number(item.quantity) || 1,
@@ -132,20 +152,33 @@ const webhookHandler = async (req, res) => {
   try {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
+
+      if (session.payment_status === "paid") {
+        await markCheckoutSessionPaid(session);
+      } else if (session.metadata?.orderId) {
+        await Order.findByIdAndUpdate(session.metadata.orderId, {
+          paymentStatus: session.payment_status || "pending",
+          stripeSessionId: session.id,
+          stripePaymentIntentId: session.payment_intent,
+        });
+      }
+    }
+
+    if (event.type === "checkout.session.async_payment_succeeded") {
+      await markCheckoutSessionPaid(event.data.object);
+    }
+
+    if (event.type === "checkout.session.async_payment_failed") {
+      const session = event.data.object;
       const orderId = session.metadata?.orderId;
 
       if (orderId) {
-        const order = await Order.findById(orderId);
-
-        if (order && order.paymentStatus !== "paid") {
-          order.paymentStatus = "paid";
-          order.orderStatus = "paid";
-          order.stripeSessionId = session.id;
-          order.stripePaymentIntentId = session.payment_intent;
-          order.paidAt = new Date();
-          await order.save();
-          notifyPaidOrder(order);
-        }
+        await Order.findByIdAndUpdate(orderId, {
+          paymentStatus: "failed",
+          orderStatus: "cancelled",
+          stripeSessionId: session.id,
+          stripePaymentIntentId: session.payment_intent,
+        });
       }
     }
 
