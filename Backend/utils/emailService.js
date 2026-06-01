@@ -40,6 +40,11 @@ const getOrderHtml = (order, heading) => {
 
 const sendEmail = async ({ to, cc = [], subject, html }) => {
   if (!resend || !to?.length) {
+    console.log("Email skipped:", {
+      hasResendKey: Boolean(resend),
+      recipientCount: to?.length || 0,
+      subject,
+    });
     return { skipped: true };
   }
 
@@ -66,7 +71,7 @@ const sendOrderEmails = async ({ order, adminEmails = [] }) => {
     ...splitEmails(process.env.ORDER_EMAIL_CC),
   ])];
 
-  await Promise.allSettled([
+  const results = await Promise.allSettled([
     sendEmail({
       to: customerEmail ? [customerEmail] : [],
       cc: sharedCc,
@@ -80,6 +85,15 @@ const sendOrderEmails = async ({ order, adminEmails = [] }) => {
       html: getOrderHtml(order, "New order received"),
     }),
   ]);
+
+  results.forEach((result, index) => {
+    if (result.status === "rejected") {
+      console.log(
+        `Order email ${index === 0 ? "customer" : "admin"} failed:`,
+        result.reason?.message || result.reason
+      );
+    }
+  });
 };
 
 module.exports = {
