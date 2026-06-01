@@ -57,6 +57,17 @@ const cloudinaryStorage = new CloudinaryStorage({
 
 const upload = multer({
   storage: hasCloudinaryConfig ? cloudinaryStorage : localStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+  },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype?.startsWith("image/") && !file.mimetype?.startsWith("video/")) {
+      cb(new Error("Only image or video files can be uploaded."));
+      return;
+    }
+
+    cb(null, true);
+  },
 });
 
 module.exports = upload;

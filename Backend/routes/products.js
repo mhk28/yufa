@@ -15,6 +15,21 @@ const {
   deleteProduct,
 } = require("../controllers/productController");
 
+const uploadProductImages = (req, res, next) => {
+  upload.array("images", 10)(req, res, (error) => {
+    if (!error) {
+      next();
+      return;
+    }
+
+    console.log("Product image upload failed:", error.message);
+
+    res.status(400).json({
+      message: error.message || "Image upload failed. Please try a different image file.",
+    });
+  });
+};
+
 
 // PUBLIC
 router.get("/", getProducts);
@@ -26,14 +41,14 @@ router.get("/:id", getProduct);
 router.post(
   "/",
   authMiddleware,
-  upload.array("images", 10),
+  uploadProductImages,
   createProduct
 );
 
 router.put(
   "/:id",
   authMiddleware,
-  upload.array("images", 10),
+  uploadProductImages,
   updateProduct
 );
 
