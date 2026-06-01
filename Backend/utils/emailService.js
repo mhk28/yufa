@@ -97,5 +97,6 @@ const sendOrderEmails = async ({ order, adminEmails = [] }) => {
 };
 
 module.exports = {
+  sendEmail,
   sendOrderEmails,
 };

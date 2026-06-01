@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/User");
 const authMiddleware = require("../middleware/auth");
+const { sendEmail } = require("../utils/emailService");
 
 
 // REGISTER ADMIN
@@ -188,6 +189,32 @@ router.get("/customers", authMiddleware, async (req, res) => {
 
     res.json(customers);
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post("/test-email", authMiddleware, async (req, res) => {
+  try {
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({ message: "Admin access required." });
+    }
+
+    const recipient = req.body.email || "admin@yufacollections.com";
+
+    const result = await sendEmail({
+      to: [recipient],
+      subject: "Yufa Collections email test",
+      html: `
+        <div style="font-family:Arial,sans-serif;color:#1a0a2e;line-height:1.6">
+          <h1 style="font-family:Georgia,serif;color:#2d1155">Email test</h1>
+          <p>If you received this, Resend is connected to Yufa successfully.</p>
+        </div>
+      `,
+    });
+
+    res.json({ message: "Test email requested.", result });
+  } catch (error) {
+    console.log("Test email failed:", error.message);
     res.status(500).json({ message: error.message });
   }
 });
