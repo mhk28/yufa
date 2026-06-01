@@ -8,6 +8,7 @@ function EditProductPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const newPreviewsRef = useRef([]);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -20,9 +21,10 @@ function EditProductPage() {
   const [showcaseSubtitle, setShowcaseSubtitle] = useState("");
   const [showcaseOrder, setShowcaseOrder] = useState("");
   const [variants, setVariants] = useState([]);
-  const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState("");
-  const [existingImage, setExistingImage] = useState("");
+  const [existingImages, setExistingImages] = useState([]);
+  const [newImages, setNewImages] = useState([]);
+  const [newPreviews, setNewPreviews] = useState([]);
+  const [showcaseImageIndex, setShowcaseImageIndex] = useState(0);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -31,15 +33,32 @@ function EditProductPage() {
   const selectedSubcategory = selectedCategory?.subcategories.find(
     (option) => option.name === subcategory
   );
-  const imagePreviewSrc = preview || getImageUrl(existingImage);
+  const galleryImages = [
+    ...existingImages.map((imageUrl) => ({
+      type: "existing",
+      src: getImageUrl(imageUrl),
+      value: imageUrl,
+    })),
+    ...newPreviews.map((previewUrl, index) => ({
+      type: "new",
+      src: previewUrl,
+      value: newImages[index]?.name || previewUrl,
+      newIndex: index,
+    })),
+  ];
+  const imagePreviewSrc = galleryImages[showcaseImageIndex]?.src || galleryImages[0]?.src || "";
 
   useEffect(() => { fetchProduct(); }, []);
 
   useEffect(() => {
+    newPreviewsRef.current = newPreviews;
+  }, [newPreviews]);
+
+  useEffect(() => {
     return () => {
-      if (preview) URL.revokeObjectURL(preview);
+      newPreviewsRef.current.forEach((preview) => URL.revokeObjectURL(preview));
     };
-  }, [preview]);
+  }, []);
 
   const fetchProduct = async () => {
     setFetchLoading(true);
@@ -57,7 +76,12 @@ function EditProductPage() {
       setShowcaseSubtitle(data.showcaseSubtitle || "");
       setShowcaseOrder(data.showcaseOrder ?? "");
       setVariants(data.variants || []);
-      setExistingImage(data.image || "");
+      const productImages = Array.isArray(data.images) && data.images.length > 0
+        ? data.images
+        : [data.image].filter(Boolean);
+      const selectedImage = data.showcaseImage || data.image || productImages[0] || "";
+      setExistingImages(productImages);
+      setShowcaseImageIndex(Math.max(0, productImages.indexOf(selectedImage)));
     } catch (err) {
       setError("Failed to load product.");
     } finally {
@@ -66,25 +90,42 @@ function EditProductPage() {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
+    const files = Array.from(e.target.files || []);
 
-    if (!file) return;
+    if (files.length === 0) return;
 
-    if (preview) URL.revokeObjectURL(preview);
-
-    setImage(file);
-    setPreview(URL.createObjectURL(file));
+    const previews = files.map((file) => URL.createObjectURL(file));
+    setNewImages((currentImages) => [...currentImages, ...files]);
+    setNewPreviews((currentPreviews) => [...currentPreviews, ...previews]);
   };
 
-  const removeNewImage = () => {
-    if (preview) URL.revokeObjectURL(preview);
+  const removeGalleryImage = (index) => {
+    const existingCount = existingImages.length;
 
-    setImage(null);
-    setPreview("");
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    if (index < existingCount) {
+      setExistingImages((currentImages) => currentImages.filter((_, imageIndex) => imageIndex !== index));
+    } else {
+      const newImageIndex = index - existingCount;
+      setNewImages((currentImages) => currentImages.filter((_, imageIndex) => imageIndex !== newImageIndex));
+      setNewPreviews((currentPreviews) => {
+        URL.revokeObjectURL(currentPreviews[newImageIndex]);
+        return currentPreviews.filter((_, previewIndex) => previewIndex !== newImageIndex);
+      });
     }
+
+    setShowcaseImageIndex((currentIndex) => {
+      if (currentIndex === index) return 0;
+      if (currentIndex > index) return currentIndex - 1;
+      return currentIndex;
+    });
+  };
+
+  const clearNewImages = () => {
+    newPreviews.forEach((preview) => URL.revokeObjectURL(preview));
+    setNewImages([]);
+    setNewPreviews([]);
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleCategoryChange = (e) => {
@@ -138,6 +179,8 @@ function EditProductPage() {
       formData.append("showcaseTitle", showcaseTitle);
       formData.append("showcaseSubtitle", showcaseSubtitle);
       formData.append("showcaseOrder", showcaseOrder);
+      formData.append("existingImages", JSON.stringify(existingImages));
+      formData.append("showcaseImageIndex", showcaseImageIndex);
       formData.append(
         "variants",
         JSON.stringify(
@@ -154,9 +197,9 @@ function EditProductPage() {
         )
       );
 
-      if (image) {
-        formData.append("images", image);
-      }
+      newImages.forEach((imageFile) => {
+        formData.append("images", imageFile);
+      });
 
       const response = await fetch(`${API_BASE_URL}/products/${id}`, {
         method: "PUT",
@@ -502,6 +545,53 @@ align-items: center;
           height: 100%;
           object-fit: cover;
           display: block;
+        }
+
+        .image-thumbs {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+          gap: 8px;
+          margin-top: 12px;
+        }
+
+        .image-thumb {
+          position: relative;
+          aspect-ratio: 1;
+          border: 1px solid rgba(201, 168, 76, 0.22);
+          background: #fdfcfb;
+          padding: 0;
+          overflow: hidden;
+          cursor: pointer;
+        }
+
+        .image-thumb.active {
+          border-color: #2d1155;
+          box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.25);
+        }
+
+        .image-thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .thumb-remove {
+          position: absolute;
+          top: 4px;
+          right: 4px;
+          width: 22px;
+          height: 22px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: none;
+          border-radius: 50%;
+          background: rgba(26, 10, 46, 0.78);
+          color: #fff;
+          font-size: 14px;
+          line-height: 1;
+          cursor: pointer;
         }
 
         .preview-empty {
@@ -896,9 +986,9 @@ align-items: center;
 
                     <div className="image-upload-panel">
                       <div>
-                        <p className="image-upload-title">Update product image</p>
+                        <p className="image-upload-title">Update product images</p>
                         <p className="image-upload-copy">
-                          Replace the current image with a clear portrait or square photo for a consistent grid crop.
+                          Add multiple product images, remove old ones, and select one image for the collection grid and homepage showcase.
                         </p>
                       </div>
 
@@ -909,22 +999,58 @@ align-items: center;
                             <polyline points="17 8 12 3 7 8" />
                             <line x1="12" y1="3" x2="12" y2="15" />
                           </svg>
-                          {imagePreviewSrc ? "Change Image" : "Upload Image"}
+                          Add Images
                         </label>
 
-                        {image && (
+                        {newImages.length > 0 && (
                           <button
                             className="btn-remove-image"
                             type="button"
-                            onClick={removeNewImage}
+                            onClick={clearNewImages}
                           >
-                            Undo
+                            Clear New
                           </button>
                         )}
                       </div>
 
-                      {image && (
-                        <p className="selected-file">{image.name}</p>
+                      {galleryImages.length > 0 && (
+                        <p className="selected-file">
+                          {galleryImages.length} image{galleryImages.length !== 1 ? "s" : ""} in this product. Active image is used for showcase.
+                        </p>
+                      )}
+
+                      {galleryImages.length > 0 && (
+                        <div className="image-thumbs">
+                          {galleryImages.map((galleryImage, index) => (
+                            <div
+                              className={`image-thumb ${showcaseImageIndex === index ? "active" : ""}`}
+                              key={`${galleryImage.type}-${galleryImage.value}-${index}`}
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => setShowcaseImageIndex(index)}
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter" || event.key === " ") {
+                                  event.preventDefault();
+                                  setShowcaseImageIndex(index);
+                                }
+                              }}
+                              title="Use this image for showcase"
+                            >
+                              <img src={galleryImage.src} alt={`Product thumbnail ${index + 1}`} />
+                              <button
+                                className="thumb-remove"
+                                type="button"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  removeGalleryImage(index);
+                                }}
+                                aria-label={`Remove image ${index + 1}`}
+                              >
+                                x
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       )}
 
                       <input
@@ -933,6 +1059,7 @@ align-items: center;
                         className="file-input"
                         type="file"
                         accept="image/*"
+                        multiple
                         onChange={handleImageChange}
                       />
                     </div>

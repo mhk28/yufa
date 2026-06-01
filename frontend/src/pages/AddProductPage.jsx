@@ -20,6 +20,7 @@ function AddProductPage() {
   const [variants, setVariants] = useState([]);
   const [images, setImages] = useState([]);
   const [previews, setPreviews] = useState([]);
+  const previewsRef = useRef([]);
   const [showcaseImageIndex, setShowcaseImageIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -30,33 +31,51 @@ function AddProductPage() {
   );
 
   useEffect(() => {
-    return () => {
-      previews.forEach((preview) => URL.revokeObjectURL(preview));
-    };
+    previewsRef.current = previews;
   }, [previews]);
+
+  useEffect(() => {
+    return () => {
+      previewsRef.current.forEach((preview) => URL.revokeObjectURL(preview));
+    };
+  }, []);
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files || []);
 
     if (files.length === 0) return;
 
-    previews.forEach((preview) => URL.revokeObjectURL(preview));
-
-    setImages(files);
-    setPreviews(files.map((file) => URL.createObjectURL(file)));
-    setShowcaseImageIndex(0);
-  };
-
-  const removeImage = () => {
-    previews.forEach((preview) => URL.revokeObjectURL(preview));
-
-    setImages([]);
-    setPreviews([]);
-    setShowcaseImageIndex(0);
+    setImages((currentImages) => [...currentImages, ...files]);
+    setPreviews((currentPreviews) => [
+      ...currentPreviews,
+      ...files.map((file) => URL.createObjectURL(file)),
+    ]);
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  const removeImage = (index) => {
+    URL.revokeObjectURL(previews[index]);
+
+    setImages((currentImages) => currentImages.filter((_, imageIndex) => imageIndex !== index));
+    setPreviews((currentPreviews) => currentPreviews.filter((_, previewIndex) => previewIndex !== index));
+
+    setShowcaseImageIndex((currentIndex) => {
+      if (currentIndex === index) return 0;
+      if (currentIndex > index) return currentIndex - 1;
+      return currentIndex;
+    });
+  };
+
+  const clearImages = () => {
+    previews.forEach((preview) => URL.revokeObjectURL(preview));
+    setImages([]);
+    setPreviews([]);
+    setShowcaseImageIndex(0);
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleCategoryChange = (e) => {
@@ -424,6 +443,7 @@ gap: 32px;
         }
 
         .image-thumb {
+          position: relative;
           aspect-ratio: 1;
           border: 1px solid rgba(201, 168, 76, 0.22);
           background: #fdfcfb;
@@ -442,6 +462,24 @@ gap: 32px;
           height: 100%;
           object-fit: cover;
           display: block;
+        }
+
+        .thumb-remove {
+          position: absolute;
+          top: 4px;
+          right: 4px;
+          width: 22px;
+          height: 22px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: none;
+          border-radius: 50%;
+          background: rgba(26, 10, 46, 0.78);
+          color: #fff;
+          font-size: 14px;
+          line-height: 1;
+          cursor: pointer;
         }
 
         .preview-empty {
@@ -823,16 +861,16 @@ gap: 32px;
                           <polyline points="17 8 12 3 7 8" />
                           <line x1="12" y1="3" x2="12" y2="15" />
                         </svg>
-                        {images.length > 0 ? "Change Images" : "Upload Images"}
+                        Add Images
                       </label>
 
                       {images.length > 0 && (
                         <button
                           className="btn-remove-image"
                           type="button"
-                          onClick={removeImage}
+                          onClick={clearImages}
                         >
-                          Remove
+                          Clear All
                         </button>
                       )}
                     </div>
@@ -843,18 +881,36 @@ gap: 32px;
                       </p>
                     )}
 
-                    {previews.length > 1 && (
+                    {previews.length > 0 && (
                       <div className="image-thumbs">
                         {previews.map((previewUrl, index) => (
-                          <button
+                          <div
                             className={`image-thumb ${showcaseImageIndex === index ? "active" : ""}`}
-                            type="button"
                             key={previewUrl}
+                            role="button"
+                            tabIndex={0}
                             onClick={() => setShowcaseImageIndex(index)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                setShowcaseImageIndex(index);
+                              }
+                            }}
                             title="Use this image for showcase"
                           >
                             <img src={previewUrl} alt={`Product thumbnail ${index + 1}`} />
-                          </button>
+                            <button
+                              className="thumb-remove"
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                removeImage(index);
+                              }}
+                              aria-label={`Remove image ${index + 1}`}
+                            >
+                              x
+                            </button>
+                          </div>
                         ))}
                       </div>
                     )}

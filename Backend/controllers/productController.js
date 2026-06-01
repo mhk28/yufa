@@ -38,6 +38,19 @@ const normalizeCategory = (category = "") => {
 
 const toBoolean = (value) => value === true || value === "true" || value === "on";
 
+const parseStringArray = (value) => {
+  if (!value) return [];
+
+  if (Array.isArray(value)) return value.filter(Boolean);
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+  } catch (error) {
+    return [];
+  }
+};
+
 const getUploadedImagePaths = (req) => {
   const getFileUrl = (file) => file.path || (file.filename ? `/uploads/${file.filename}` : "");
 
@@ -202,15 +215,26 @@ const updateProduct = async (req, res) => {
     const uploadedImages = getUploadedImagePaths(req);
 
     if (uploadedImages.length > 0) {
+      const existingImages = parseStringArray(updateData.existingImages);
+      const allImages = [...existingImages, ...uploadedImages];
       const selectedShowcaseIndex = Math.max(0, Number(updateData.showcaseImageIndex) || 0);
-      const primaryImage = uploadedImages[selectedShowcaseIndex] || uploadedImages[0];
+      const primaryImage = allImages[selectedShowcaseIndex] || allImages[0];
       updateData.image = primaryImage;
       updateData.showcaseImage = primaryImage;
-      updateData.images = uploadedImages;
-      delete updateData.showcaseImageIndex;
+      updateData.images = allImages;
+    } else if (Object.prototype.hasOwnProperty.call(updateData, "existingImages")) {
+      const existingImages = parseStringArray(updateData.existingImages);
+      const selectedShowcaseIndex = Math.max(0, Number(updateData.showcaseImageIndex) || 0);
+      const primaryImage = existingImages[selectedShowcaseIndex] || existingImages[0] || "";
+      updateData.image = primaryImage;
+      updateData.showcaseImage = primaryImage;
+      updateData.images = existingImages;
     } else if (Object.prototype.hasOwnProperty.call(updateData, "showcaseImage")) {
       updateData.image = updateData.showcaseImage;
     }
+
+    delete updateData.existingImages;
+    delete updateData.showcaseImageIndex;
 
     const updatedProduct =
       await Product.findByIdAndUpdate(
