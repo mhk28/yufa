@@ -140,6 +140,17 @@ export function AuthPanel({ eyebrow, title, children, error, footer }) {
         .auth-footer a {
           color: #2d1155;
         }
+
+        @media (max-width: 640px) {
+          .auth-page {
+            min-height: auto;
+            padding: 42px 20px;
+          }
+
+          .auth-card {
+            padding: 30px 24px;
+          }
+        }
       `}</style>
       <section className="auth-page">
         <div className="auth-card">

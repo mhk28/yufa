@@ -83,6 +83,13 @@ function CheckoutSuccessPage() {
           border-color: #2d1155;
           color: #e8c96e;
         }
+
+        @media (max-width: 640px) {
+          .checkout-result {
+            min-height: auto;
+            padding: 48px 22px;
+          }
+        }
       `}</style>
 
       <StoreLayout>

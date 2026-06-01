@@ -16,20 +16,21 @@ function AdminLayout({ children }) {
           margin: 0;
           padding: 0;
           width: 100%;
-          min-height: 100vh;
+          min-height: 100dvh;
           background: #f8f5f2;
           font-family: 'Jost', sans-serif;
+          overflow-x: hidden;
         }
 
         .admin-layout {
           display: flex;
-          min-height: 100vh;
+          min-height: 100dvh;
         }
 
         .admin-main {
           flex: 1;
           background: #f8f5f2;
-          min-height: 100vh;
+          min-height: 100dvh;
           overflow-y: auto;
         }
 
@@ -68,6 +69,12 @@ function AdminLayout({ children }) {
         @media (max-width: 840px) {
           .admin-layout {
             flex-direction: column;
+            min-height: auto;
+          }
+
+          .admin-main {
+            min-height: auto;
+            overflow-y: visible;
           }
 
           .admin-content {

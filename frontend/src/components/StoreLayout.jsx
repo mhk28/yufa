@@ -20,11 +20,12 @@ function StoreLayout({ children }) {
         #root {
           width: 100%;
           max-width: none;
-          min-height: 100vh;
+          min-height: 100dvh;
           margin: 0;
           padding: 0;
           border: none;
           text-align: initial;
+          overflow-x: hidden;
         }
 
         body {
@@ -32,6 +33,7 @@ function StoreLayout({ children }) {
           background: #fbf8f4;
           color: #1a0a2e;
           overflow-x: hidden;
+          overscroll-behavior-y: none;
         }
 
         ::selection {
@@ -42,7 +44,7 @@ function StoreLayout({ children }) {
         .store-shell {
           width: 100%;
           min-width: 0;
-          min-height: 100vh;
+          min-height: 100dvh;
           background:
             linear-gradient(180deg, #fbf8f4 0%, #fffdf9 42%, #f8f1ea 100%);
           font-family: 'Jost', sans-serif;
@@ -157,7 +159,7 @@ function StoreLayout({ children }) {
         }
 
         .store-main {
-          min-height: 70vh;
+          min-height: 0;
         }
 
         .store-section {
