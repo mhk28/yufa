@@ -58,9 +58,18 @@ Customer emails go to the checkout email address. Admin notifications go to admi
 
 Stripe Checkout is the active payment route.
 
-Customers pay through Stripe's secure hosted checkout page. Cards are entered on Stripe, not directly on the Yufa website.
+Customers pay through Stripe's secure hosted checkout page. Cards and wallet details are entered on Stripe, not directly on the Yufa website.
 
-PayNow and Apple Pay are not enabled as standalone payment methods yet. They can be added later after the business confirms the preferred payment flow.
+The checkout page displays the accepted methods, then sends customers to Stripe when they press `Pay Now`. Stripe will show the methods that are available for that customer, device, browser, and checkout amount.
+
+Supported through Stripe when eligible:
+
+- Visa / Mastercard
+- PayNow
+- Apple Pay
+- Google Pay
+
+These are not separate custom Yufa payment buttons. Stripe handles the payment screen and confirms successful payments through the webhook.
 
 ## Media Uploads
 
@@ -82,4 +91,3 @@ Before announcing a new product:
 4. Publish it.
 5. Enable showcase only if it should appear on the homepage.
 6. Check the public collections page on mobile.
-

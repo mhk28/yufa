@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import StoreLayout from "../components/StoreLayout";
 import { useCart } from "../context/CartContext";
 import { useCustomerAuth } from "../context/CustomerAuthContext";
 import { API_BASE_URL, formatCurrency } from "../utils/storefront";
 
 function CheckoutPage() {
-  const navigate = useNavigate();
-  const { items, subtotal, clearCart } = useCart();
+  const { items, subtotal } = useCart();
   const { token, isAuthenticated, user } = useCustomerAuth();
   const [customerInfo, setCustomerInfo] = useState({
     firstName: user?.name?.split(" ")[0] || "",
@@ -18,7 +17,6 @@ function CheckoutPage() {
   });
   const [error, setError] = useState("");
   const [placing, setPlacing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("stripe");
 
   const updateField = (field, value) => {
     setCustomerInfo((currentInfo) => ({ ...currentInfo, [field]: value }));
@@ -26,42 +24,10 @@ function CheckoutPage() {
 
   const handlePlaceOrder = async () => {
     setError("");
-
-    if (paymentMethod !== "stripe") {
-      setError("This payment method is not enabled yet. Please use Stripe Checkout for now.");
-      return;
-    }
-
     setPlacing(true);
 
     try {
-      if (paymentMethod === "stripe") {
-        const response = await fetch(`${API_BASE_URL}/payments/create-checkout-session`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(isAuthenticated ? { Authorization: token } : {}),
-          },
-          body: JSON.stringify({
-            customerInfo,
-            items,
-            subtotal,
-            shipping: 0,
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || "Unable to start Stripe checkout.");
-        }
-
-        window.location.href = data.url;
-        return;
-      }
-
-      const endpoint = isAuthenticated ? "/orders/customer" : "/orders";
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}/payments/create-checkout-session`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -72,18 +38,16 @@ function CheckoutPage() {
           items,
           subtotal,
           shipping: 0,
-          paymentMethod,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Unable to place order.");
+        throw new Error(data.message || "Unable to start Stripe checkout.");
       }
 
-      clearCart();
-      navigate(isAuthenticated ? "/orders" : "/collections");
+      window.location.href = data.url;
     } catch (err) {
       setError(err.message);
     } finally {
@@ -216,97 +180,59 @@ function CheckoutPage() {
           text-decoration-color: rgba(201, 168, 76, 0.8);
         }
 
-        .payment-options {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 12px;
+        .accepted-payments {
           margin-top: 22px;
-        }
-
-        .payment-option {
-          display: grid;
-          grid-template-columns: 1fr auto;
-          align-items: center;
-          gap: 14px;
-          min-height: 88px;
-          padding: 16px;
+          padding: 18px;
           border: 1px solid rgba(201, 168, 76, 0.18);
           background: #fdfcfb;
-          color: #1a0a2e;
-          cursor: pointer;
-          text-align: left;
-          transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
         }
 
-        .payment-option:hover {
-          border-color: rgba(201, 168, 76, 0.42);
-          transform: translateY(-1px);
-        }
-
-        .payment-option.active {
-          border-color: #c9a84c;
-          box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
-        }
-
-        .payment-option.disabled {
-          cursor: not-allowed;
-          opacity: 0.62;
-          background: rgba(253, 252, 251, 0.68);
-        }
-
-        .payment-option.disabled:hover {
-          border-color: rgba(201, 168, 76, 0.18);
-          transform: none;
-        }
-
-        .payment-copy {
+        .accepted-heading {
           display: flex;
-          flex-direction: column;
-          gap: 6px;
-          min-width: 0;
-          align-items: flex-start;
-          text-align: left;
+          align-items: baseline;
+          justify-content: space-between;
+          gap: 16px;
+          margin-bottom: 16px;
         }
 
-        .payment-name {
+        .accepted-title {
           font-family: 'Jost', sans-serif;
-          font-size: 13px;
+          font-size: 11px;
           font-weight: 500;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.22em;
           text-transform: uppercase;
           color: #1a0a2e;
-          line-height: 1.2;
-          text-align: left;
+          margin: 0;
         }
 
-        .payment-detail {
+        .accepted-security {
           font-family: 'Jost', sans-serif;
           font-size: 12px;
           color: rgba(45, 17, 85, 0.48);
-          line-height: 1.35;
-          text-align: left;
+          margin: 0;
         }
 
-        .payment-status {
-          width: fit-content;
-          margin-top: 2px;
-          padding: 4px 8px;
-          border: 1px solid rgba(201, 168, 76, 0.22);
-          border-radius: 999px;
-          font-family: 'Jost', sans-serif;
-          font-size: 9px;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
-          color: rgba(45, 17, 85, 0.58);
+        .accepted-grid {
+          display: grid;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 10px;
         }
 
-        .payment-status.live {
-          border-color: rgba(39, 174, 96, 0.22);
-          color: #2d6f45;
+        .accepted-method {
+          min-height: 78px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 12px 10px;
+          border: 1px solid rgba(201, 168, 76, 0.16);
+          background: #fff;
+          text-align: center;
         }
 
-        .payment-logo {
-          width: 82px;
+        .accepted-logo {
+          width: 80px;
           height: 34px;
           display: inline-flex;
           align-items: center;
@@ -319,12 +245,21 @@ function CheckoutPage() {
             0 2px 6px rgba(45, 17, 85, 0.08);
         }
 
-        .payment-logo img {
-          width: 82px;
+        .accepted-logo img {
+          width: 80px;
           height: 34px;
           display: block;
           object-fit: contain;
           border-radius: 8px;
+        }
+
+        .accepted-name {
+          font-family: 'Jost', sans-serif;
+          font-size: 10px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: rgba(45, 17, 85, 0.58);
+          line-height: 1.25;
         }
 
         .checkout-error {
@@ -420,13 +355,17 @@ function CheckoutPage() {
             grid-template-columns: 1fr;
           }
 
-          .payment-options {
-            grid-template-columns: 1fr;
+          .accepted-heading {
+            flex-direction: column;
+            gap: 6px;
           }
 
-          .payment-option {
-            min-height: 78px;
-            padding: 14px;
+          .accepted-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .accepted-method {
+            min-height: 74px;
           }
         }
       `}</style>
@@ -492,78 +431,53 @@ function CheckoutPage() {
                 </div>
               </div>
 
-              <h2 className="checkout-section-title payment-section-title">Payment Method</h2>
-              <div className="payment-options" aria-label="Payment methods">
-                {[
+              <h2 className="checkout-section-title payment-section-title">Payment</h2>
+              <div className="accepted-payments" aria-label="Accepted payment methods">
+                <div className="accepted-heading">
+                  <p className="accepted-title">We Accept</p>
+                  <p className="accepted-security">Securely processed by Stripe Checkout</p>
+                </div>
+                <div className="accepted-grid">
+                  {[
                   {
                     id: "stripe",
-                    name: "Stripe Checkout",
-                    detail: "Cards, PayNow, and eligible wallets",
+                    name: "Stripe",
                     logo: "/images/stripe.png",
-                    className: "",
-                    status: "Active",
-                    enabled: true,
                   },
                   {
                     id: "paynow",
                     name: "PayNow",
-                    detail: "Shown by Stripe when eligible",
                     logo: "/images/paynow.jpg",
-                    className: "paynow",
-                    status: "Via Stripe",
-                    enabled: false,
                   },
                   {
                     id: "card",
-                    name: "Cards",
-                    detail: "Handled inside Stripe Checkout",
+                    name: "Visa / Mastercard",
                     logo: "/images/visa-mastercard.jpg",
-                    className: "card",
-                    status: "Via Stripe",
-                    enabled: false,
                   },
                   {
                     id: "apple_pay",
                     name: "Apple Pay",
-                    detail: "Shown on eligible Apple devices",
                     logo: "/images/apple-pay.png",
-                    className: "apple",
-                    status: "Via Stripe",
-                    enabled: false,
                   },
                   {
                     id: "google_pay",
                     name: "Google Pay",
-                    detail: "Shown on eligible Android or Chrome devices",
                     logo: "/images/google-pay.png",
-                    className: "google",
-                    status: "Via Stripe",
-                    enabled: false,
                   },
-                ].map((method) => (
-                  <button
-                    key={method.id}
-                    className={`payment-option ${paymentMethod === method.id ? "active" : ""} ${method.enabled ? "" : "disabled"}`}
-                    type="button"
-                    disabled={!method.enabled}
-                    onClick={() => setPaymentMethod(method.id)}
-                  >
-                    <span className="payment-copy">
-                      <span className="payment-name">{method.name}</span>
-                      <span className="payment-detail">{method.detail}</span>
-                      <span className={`payment-status ${method.enabled ? "live" : ""}`}>{method.status}</span>
-                    </span>
-                    <span className={`payment-logo ${method.className}`}>
+                  ].map((method) => (
+                    <div className="accepted-method" key={method.id}>
+                    <span className="accepted-logo">
                       <img src={method.logo} alt={`${method.name} logo`} />
                     </span>
-                  </button>
-                ))}
+                      <span className="accepted-name">{method.name}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="payment-note">
-                Stripe Checkout is the active payment route. Cards, PayNow, Apple Pay, and Google Pay appear on
-                Stripe's hosted checkout page when they are enabled, eligible for SGD, and supported by the
-                customer's device or browser.
+                Press Pay Now to continue to Stripe's secure checkout. Stripe will show the payment methods
+                available for your device, browser, and checkout amount.
               </div>
               {error && <div className="checkout-error">{error}</div>}
             </div>
@@ -590,7 +504,7 @@ function CheckoutPage() {
                 disabled={items.length === 0 || placing}
                 onClick={handlePlaceOrder}
               >
-                {placing ? "Placing..." : paymentMethod === "stripe" ? "Pay Now" : "Place Order"}
+                {placing ? "Opening Stripe..." : "Pay Now"}
               </button>
               <Link className="back-cart-link" to="/cart">
                 Back to Cart

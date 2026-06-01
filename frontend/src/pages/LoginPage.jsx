@@ -102,6 +102,9 @@ function LoginPage() {
 
         .login-left-content {
           position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           text-align: center;
           padding: 40px;
           max-width: 520px;
@@ -138,11 +141,14 @@ function LoginPage() {
         }
 
         .login-left-caption {
+          display: block;
+          width: 100%;
           font-family: 'Jost', sans-serif;
           font-size: 11px;
           letter-spacing: 0.3em;
           text-transform: uppercase;
           color: rgba(255, 255, 255, 0.3);
+          text-align: center;
         }
 
         .login-right {
