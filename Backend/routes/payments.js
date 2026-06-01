@@ -98,9 +98,7 @@ router.post("/create-checkout-session", async (req, res) => {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      automatic_payment_methods: {
-        enabled: true,
-      },
+      payment_method_types: ["card", "paynow"],
       customer_email: customerInfo?.email || undefined,
       line_items: items.map((item) => ({
         quantity: Number(item.quantity) || 1,
