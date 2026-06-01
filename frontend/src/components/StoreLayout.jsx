@@ -25,7 +25,6 @@ function StoreLayout({ children }) {
           padding: 0;
           border: none;
           text-align: initial;
-          overflow-x: hidden;
         }
 
         body {
@@ -33,7 +32,6 @@ function StoreLayout({ children }) {
           background: #fbf8f4;
           color: #1a0a2e;
           overflow-x: hidden;
-          overscroll-behavior-y: none;
         }
 
         ::selection {
