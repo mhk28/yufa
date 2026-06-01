@@ -14,6 +14,9 @@ function ShowcasePage() {
   const [savingSlideId, setSavingSlideId] = useState("");
   const [error, setError] = useState("");
 
+  const getSlideImages = (slide) =>
+    [...new Set([slide.mediaUrl, ...(slide.images || []), slide.product?.showcaseImage, slide.product?.image, ...(slide.product?.images || [])].filter(Boolean))];
+
   const fetchSlides = async () => {
     setLoading(true);
     try {
@@ -135,6 +138,7 @@ function ShowcasePage() {
             subtitle: slide.subtitle,
             order: slide.order,
             isShowcased: true,
+            showcaseImage: slide.mediaUrl,
           }),
         });
 
@@ -287,6 +291,65 @@ function ShowcasePage() {
           background: #efe7df;
         }
 
+        .slide-media-wrap {
+          position: relative;
+          overflow: hidden;
+          background: #efe7df;
+        }
+
+        .slide-gallery-button {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 34px;
+          height: 34px;
+          border-radius: 999px;
+          border: 1px solid rgba(232, 201, 110, 0.5);
+          background: rgba(26, 10, 46, 0.72);
+          color: #f8e8ac;
+          font-family: 'Jost', sans-serif;
+          font-size: 18px;
+          line-height: 1;
+          cursor: pointer;
+          z-index: 2;
+        }
+
+        .slide-gallery-button.prev {
+          left: 9px;
+        }
+
+        .slide-gallery-button.next {
+          right: 9px;
+        }
+
+        .slide-thumb-row {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+          gap: 7px;
+          margin: 0 16px 14px;
+        }
+
+        .slide-thumb {
+          aspect-ratio: 1;
+          padding: 0;
+          border: 1px solid rgba(201, 168, 76, 0.2);
+          background: #f8f4ef;
+          cursor: pointer;
+          overflow: hidden;
+        }
+
+        .slide-thumb.active {
+          border-color: #c9a84c;
+          box-shadow: 0 0 0 2px rgba(201, 168, 76, 0.22);
+        }
+
+        .slide-thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
         .slide-body {
           padding: 16px;
           text-align: left;
@@ -400,6 +463,26 @@ function ShowcasePage() {
             aspect-ratio: 1 / 1.12;
           }
 
+          .slide-gallery-button {
+            width: 28px;
+            height: 28px;
+            font-size: 15px;
+          }
+
+          .slide-gallery-button.prev {
+            left: 6px;
+          }
+
+          .slide-gallery-button.next {
+            right: 6px;
+          }
+
+          .slide-thumb-row {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 5px;
+            margin: 0 11px 10px;
+          }
+
           .slide-body {
             padding: 11px;
           }
@@ -489,15 +572,61 @@ function ShowcasePage() {
               {loading ? (
                 <p className="showcase-copy">Loading slides...</p>
               ) : (
-                slides.map((slide) => (
-                  <div className="slide-card" key={slide._id}>
-                    {slide.mediaType === "video" && slide.mediaUrl ? (
-                      <video className="slide-media" src={getImageUrl(slide.mediaUrl)} muted playsInline />
-                    ) : slide.mediaUrl ? (
-                      <img className="slide-media" src={getImageUrl(slide.mediaUrl)} alt={slide.title || "Showcase"} />
-                    ) : (
-                      <div className="slide-media" />
-                    )}
+                slides.map((slide) => {
+                  const slideImages = getSlideImages(slide);
+                  const activeImageIndex = Math.max(0, slideImages.findIndex((image) => image === slide.mediaUrl));
+                  const changeSlideImage = (direction) => {
+                    if (slideImages.length <= 1) return;
+                    const nextIndex = (activeImageIndex + direction + slideImages.length) % slideImages.length;
+                    updateSlideField(slide._id, "mediaUrl", slideImages[nextIndex]);
+                  };
+
+                  return (
+                    <div className="slide-card" key={slide._id}>
+                      <div className="slide-media-wrap">
+                        {slide.mediaType === "video" && slide.mediaUrl ? (
+                          <video className="slide-media" src={getImageUrl(slide.mediaUrl)} muted playsInline />
+                        ) : slide.mediaUrl ? (
+                          <img className="slide-media" src={getImageUrl(slide.mediaUrl)} alt={slide.title || "Showcase"} />
+                        ) : (
+                          <div className="slide-media" />
+                        )}
+                        {slide.sourceType === "product" && slideImages.length > 1 && (
+                          <>
+                            <button
+                              className="slide-gallery-button prev"
+                              type="button"
+                              onClick={() => changeSlideImage(-1)}
+                              aria-label={`Previous showcase image for ${slide.title || "product"}`}
+                            >
+                              &lt;
+                            </button>
+                            <button
+                              className="slide-gallery-button next"
+                              type="button"
+                              onClick={() => changeSlideImage(1)}
+                              aria-label={`Next showcase image for ${slide.title || "product"}`}
+                            >
+                              &gt;
+                            </button>
+                          </>
+                        )}
+                      </div>
+                      {slide.sourceType === "product" && slideImages.length > 1 && (
+                        <div className="slide-thumb-row" aria-label="Choose showcase image">
+                          {slideImages.map((image) => (
+                            <button
+                              key={image}
+                              className={`slide-thumb ${image === slide.mediaUrl ? "active" : ""}`}
+                              type="button"
+                              onClick={() => updateSlideField(slide._id, "mediaUrl", image)}
+                              aria-label="Use this image for homepage showcase"
+                            >
+                              <img src={getImageUrl(image)} alt="" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     <div className="slide-body">
                       <span className="slide-source">
                         {slide.sourceType === "product" ? "Product Showcase" : "Uploaded Slide"}
@@ -538,7 +667,8 @@ function ShowcasePage() {
                       </div>
                     </div>
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>

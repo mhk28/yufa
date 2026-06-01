@@ -9,6 +9,8 @@ const router = express.Router();
 const isAdmin = (req) => req.user?.role === "admin";
 const getMediaType = (file = {}) => (file.mimetype?.startsWith("video/") ? "video" : "image");
 const getFileUrl = (file) => file.path || (file.filename ? `/uploads/${file.filename}` : "");
+const getProductImages = (product) =>
+  [...new Set([product.showcaseImage, product.image, ...(product.images || [])].filter(Boolean))];
 const mapProductToSlide = (product) => ({
   _id: `product-${product._id}`,
   sourceType: "product",
@@ -17,6 +19,7 @@ const mapProductToSlide = (product) => ({
   subtitle: product.showcaseSubtitle || product.description || "",
   mediaUrl: product.showcaseImage || product.image,
   mediaType: "image",
+  images: getProductImages(product),
   order: product.showcaseOrder || 0,
   isActive: product.isPublished && product.isShowcased,
   product,
@@ -85,6 +88,7 @@ router.put("/product/:productId", authMiddleware, async (req, res) => {
         showcaseTitle: req.body.title || "",
         showcaseSubtitle: req.body.subtitle || "",
         showcaseOrder: Number(req.body.order) || 0,
+        ...(req.body.showcaseImage ? { showcaseImage: req.body.showcaseImage } : {}),
       },
       { new: true }
     );

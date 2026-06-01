@@ -19,8 +19,23 @@ function ProductsPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+  const [activeImageByProduct, setActiveImageByProduct] = useState({});
 
   useEffect(() => { fetchProducts(); }, []);
+
+  const getProductGallery = (product) =>
+    [...new Set([product.image, product.showcaseImage, ...(product.images || [])].filter(Boolean))];
+
+  const changeProductImage = (product, direction) => {
+    const gallery = getProductGallery(product);
+    if (gallery.length <= 1) return;
+
+    setActiveImageByProduct((current) => {
+      const currentIndex = current[product._id] || 0;
+      const nextIndex = (currentIndex + direction + gallery.length) % gallery.length;
+      return { ...current, [product._id]: nextIndex };
+    });
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -296,6 +311,7 @@ function ProductsPage() {
   aspect-ratio: 4 / 5;
   overflow: hidden;
   background: #f3efeb;
+  position: relative;
 }
 
 .product-image {
@@ -308,6 +324,55 @@ function ProductsPage() {
 .product-card:hover .product-image {
   transform: scale(1.03);
 }
+
+        .product-gallery-button {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 34px;
+          height: 34px;
+          border-radius: 999px;
+          border: 1px solid rgba(232, 201, 110, 0.5);
+          background: rgba(26, 10, 46, 0.72);
+          color: #f8e8ac;
+          font-family: 'Jost', sans-serif;
+          font-size: 18px;
+          line-height: 1;
+          cursor: pointer;
+          z-index: 2;
+          opacity: 0;
+          transition: opacity 0.2s ease, background 0.2s ease;
+        }
+
+        .product-gallery-button:hover {
+          background: rgba(45, 17, 85, 0.92);
+        }
+
+        .product-gallery-button.prev {
+          left: 10px;
+        }
+
+        .product-gallery-button.next {
+          right: 10px;
+        }
+
+        .product-image-wrapper:hover .product-gallery-button,
+        .product-image-wrapper:focus-within .product-gallery-button {
+          opacity: 1;
+        }
+
+        .product-gallery-count {
+          position: absolute;
+          right: 10px;
+          bottom: 10px;
+          padding: 5px 8px;
+          border-radius: 999px;
+          background: rgba(26, 10, 46, 0.68);
+          color: #f8e8ac;
+          font-family: 'Jost', sans-serif;
+          font-size: 10px;
+          letter-spacing: 0.08em;
+        }
 
         .product-card {
           background: #fff;
@@ -551,6 +616,28 @@ function ProductsPage() {
             aspect-ratio: 1 / 1.12;
           }
 
+          .product-gallery-button {
+            width: 28px;
+            height: 28px;
+            font-size: 15px;
+            opacity: 1;
+          }
+
+          .product-gallery-button.prev {
+            left: 6px;
+          }
+
+          .product-gallery-button.next {
+            right: 6px;
+          }
+
+          .product-gallery-count {
+            right: 7px;
+            bottom: 7px;
+            padding: 4px 7px;
+            font-size: 8px;
+          }
+
           .product-card-body {
             padding: 11px;
           }
@@ -726,18 +813,45 @@ function ProductsPage() {
             </div>
           ) : (
             <div className="products-grid">
-              {filteredProducts.map((product) => (
-                <div key={product._id} className="product-card">
-                  <div className="product-card-top" />
-                  {product.image && (
-                    <div className="product-image-wrapper">
-                      <img
-                        src={getImageUrl(product.image)}
-                        alt={product.name}
-                        className="product-image"
-                      />
-                    </div>
-                  )}
+              {filteredProducts.map((product) => {
+                const gallery = getProductGallery(product);
+                const activeIndex = Math.min(activeImageByProduct[product._id] || 0, gallery.length - 1);
+
+                return (
+                  <div key={product._id} className="product-card">
+                    <div className="product-card-top" />
+                    {gallery.length > 0 && (
+                      <div className="product-image-wrapper">
+                        <img
+                          src={getImageUrl(gallery[activeIndex])}
+                          alt={product.name}
+                          className="product-image"
+                        />
+                        {gallery.length > 1 && (
+                          <>
+                            <button
+                              className="product-gallery-button prev"
+                              type="button"
+                              onClick={() => changeProductImage(product, -1)}
+                              aria-label={`Previous image for ${product.name}`}
+                            >
+                              &lt;
+                            </button>
+                            <button
+                              className="product-gallery-button next"
+                              type="button"
+                              onClick={() => changeProductImage(product, 1)}
+                              aria-label={`Next image for ${product.name}`}
+                            >
+                              &gt;
+                            </button>
+                            <span className="product-gallery-count">
+                              {activeIndex + 1}/{gallery.length}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    )}
                   <div className="product-card-body">
                     <span className={`product-card-status ${product.isPublished ? "published" : "hidden"}`}>
                       <span className="status-dot" />
@@ -791,7 +905,8 @@ function ProductsPage() {
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
