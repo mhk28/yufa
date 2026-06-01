@@ -66,6 +66,16 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
 
+    salePrice: {
+      type: Number,
+      default: 0,
+    },
+
+    isOnSale: {
+      type: Boolean,
+      default: false,
+    },
+
     image: {
       type: String,
     },

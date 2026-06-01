@@ -258,8 +258,10 @@ function Sidebar() {
             width: 100%;
             min-height: auto;
             height: auto;
-            position: relative;
+            position: sticky;
+            top: 0;
             left: auto;
+            z-index: 40;
           }
 
           .sidebar-logo-area {

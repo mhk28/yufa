@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { getProductCollectionLabel } from "../data/catalogueOptions";
-import { getImageUrl, getProductPriceLabel } from "../utils/storefront";
+import { formatCurrency, getImageUrl, getProductOriginalPrice, getProductPriceLabel } from "../utils/storefront";
 
 function ProductCard({ product }) {
+  const originalPrice = getProductOriginalPrice(product);
+
   return (
     <>
       <style>{`
@@ -114,6 +116,37 @@ function ProductCard({ product }) {
           color: rgba(45, 17, 85, 0.62);
         }
 
+        .store-product-price.sale {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .store-sale-price {
+          color: #2d1155;
+          font-weight: 500;
+        }
+
+        .store-original-price {
+          color: rgba(45, 17, 85, 0.38);
+          text-decoration: line-through;
+        }
+
+        .store-sale-badge {
+          position: absolute;
+          top: 12px;
+          left: 12px;
+          z-index: 3;
+          padding: 6px 9px;
+          background: #2d1155;
+          color: #e8c96e;
+          font-family: 'Jost', sans-serif;
+          font-size: 9px;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+        }
+
         @media (max-width: 720px) {
           .store-product-image-wrap {
             aspect-ratio: 1 / 1.2;
@@ -173,12 +206,20 @@ function ProductCard({ product }) {
           ) : (
           <div className="store-product-placeholder">Yufa</div>
           )}
+          {product.isOnSale && originalPrice > 0 && <span className="store-sale-badge">Sale</span>}
           <span className="quick-view-cue">View Piece</span>
         </div>
         <div className="store-product-info">
           <p className="store-product-category">{getProductCollectionLabel(product) || "Collection"}</p>
           <h3 className="store-product-name">{product.name}</h3>
-          <p className="store-product-price">{getProductPriceLabel(product)}</p>
+          {product.isOnSale && originalPrice > 0 ? (
+            <p className="store-product-price sale">
+              <span className="store-sale-price">{getProductPriceLabel(product)}</span>
+              <span className="store-original-price">{formatCurrency(originalPrice)}</span>
+            </p>
+          ) : (
+            <p className="store-product-price">{getProductPriceLabel(product)}</p>
+          )}
         </div>
       </Link>
     </>

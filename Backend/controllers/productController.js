@@ -80,6 +80,8 @@ const createProduct = async (
       design,
       basePrice,
       price,
+      salePrice,
+      isOnSale,
       variants,
       isShowcased,
       showcaseTitle,
@@ -89,6 +91,8 @@ const createProduct = async (
     } = req.body;
 
     const normalizedBasePrice = Number(basePrice ?? price) || 0;
+    const normalizedSalePrice = Number(salePrice) || 0;
+    const productIsOnSale = toBoolean(isOnSale) && normalizedSalePrice > 0 && normalizedSalePrice < normalizedBasePrice;
     const uploadedImages = getUploadedImagePaths(req);
     const selectedShowcaseIndex = Math.max(0, Number(showcaseImageIndex) || 0);
     const primaryImage = uploadedImages[selectedShowcaseIndex] || uploadedImages[0] || "";
@@ -103,6 +107,8 @@ const createProduct = async (
         design,
         basePrice: normalizedBasePrice,
         price: normalizedBasePrice,
+        salePrice: productIsOnSale ? normalizedSalePrice : 0,
+        isOnSale: productIsOnSale,
         variants: normalizeVariants(variants),
         isShowcased: toBoolean(isShowcased),
         showcaseTitle: showcaseTitle || "",
@@ -194,6 +200,20 @@ const updateProduct = async (req, res) => {
       const normalizedBasePrice = Number(updateData.basePrice ?? updateData.price) || 0;
       updateData.basePrice = normalizedBasePrice;
       updateData.price = normalizedBasePrice;
+    }
+
+    if (
+      Object.prototype.hasOwnProperty.call(updateData, "salePrice") ||
+      Object.prototype.hasOwnProperty.call(updateData, "isOnSale") ||
+      Object.prototype.hasOwnProperty.call(updateData, "basePrice") ||
+      Object.prototype.hasOwnProperty.call(updateData, "price")
+    ) {
+      const basePriceValue = Number(updateData.basePrice ?? updateData.price) || 0;
+      const salePriceValue = Number(updateData.salePrice) || 0;
+      const productIsOnSale = toBoolean(updateData.isOnSale) && salePriceValue > 0 && salePriceValue < basePriceValue;
+
+      updateData.salePrice = productIsOnSale ? salePriceValue : 0;
+      updateData.isOnSale = productIsOnSale;
     }
 
     if (Object.prototype.hasOwnProperty.call(updateData, "variants")) {

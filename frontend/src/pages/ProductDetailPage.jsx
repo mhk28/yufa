@@ -8,6 +8,7 @@ import {
   API_BASE_URL,
   formatCurrency,
   getImageUrl,
+  getProductOriginalPrice,
   getProductPrice,
   getProductPriceLabel,
 } from "../utils/storefront";
@@ -30,6 +31,7 @@ function ProductDetailPage() {
       ? getProductPrice(product)
       : getProductPrice(product);
   const canAddToCart = Boolean(activePrice) && (!hasVariants || selectedVariant);
+  const originalPrice = getProductOriginalPrice(product);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -56,6 +58,20 @@ function ProductDetailPage() {
   const galleryImages = product
     ? [...new Set([product.showcaseImage, product.image, ...(product.images || [])].filter(Boolean))]
     : [];
+
+  const showPreviousImage = () => {
+    if (galleryImages.length < 2) return;
+    setActiveImageIndex((currentIndex) =>
+      currentIndex === 0 ? galleryImages.length - 1 : currentIndex - 1
+    );
+  };
+
+  const showNextImage = () => {
+    if (galleryImages.length < 2) return;
+    setActiveImageIndex((currentIndex) =>
+      currentIndex === galleryImages.length - 1 ? 0 : currentIndex + 1
+    );
+  };
 
   const handleAddToCart = () => {
     if (!product || !canAddToCart) return;
@@ -125,6 +141,7 @@ function ProductDetailPage() {
         }
 
         .detail-image-frame {
+          position: relative;
           aspect-ratio: 4 / 5;
           overflow: hidden;
           background: #efe7df;
@@ -172,6 +189,31 @@ function ProductDetailPage() {
           height: 100%;
           object-fit: cover;
           display: block;
+        }
+
+        .detail-gallery-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 42px;
+          height: 42px;
+          border: 1px solid rgba(255, 255, 255, 0.58);
+          border-radius: 50%;
+          background: rgba(26, 10, 46, 0.42);
+          color: #fff;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          z-index: 2;
+        }
+
+        .detail-gallery-arrow.prev {
+          left: 14px;
+        }
+
+        .detail-gallery-arrow.next {
+          right: 14px;
         }
 
         .detail-content {
@@ -276,6 +318,30 @@ function ProductDetailPage() {
           font-weight: 400;
           color: #2d1155;
           margin: 0 0 22px;
+        }
+
+        .detail-price.sale {
+          display: flex;
+          align-items: baseline;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .detail-original-price {
+          font-family: 'Jost', sans-serif;
+          font-size: 15px;
+          color: rgba(45, 17, 85, 0.42);
+          text-decoration: line-through;
+        }
+
+        .detail-sale-badge {
+          padding: 6px 9px;
+          background: #2d1155;
+          color: #e8c96e;
+          font-family: 'Jost', sans-serif;
+          font-size: 9px;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
         }
 
         .variant-field {
@@ -499,11 +565,23 @@ function ProductDetailPage() {
               <div className="detail-gallery">
                 <div className="detail-image-frame">
                   {galleryImages.length > 0 ? (
-                    <img
-                      className="detail-image"
-                      src={getImageUrl(galleryImages[activeImageIndex] || galleryImages[0])}
-                      alt={product.name}
-                    />
+                    <>
+                      <img
+                        className="detail-image"
+                        src={getImageUrl(galleryImages[activeImageIndex] || galleryImages[0])}
+                        alt={product.name}
+                      />
+                      {galleryImages.length > 1 && (
+                        <>
+                          <button className="detail-gallery-arrow prev" type="button" onClick={showPreviousImage} aria-label="Previous image">
+                            ‹
+                          </button>
+                          <button className="detail-gallery-arrow next" type="button" onClick={showNextImage} aria-label="Next image">
+                            ›
+                          </button>
+                        </>
+                      )}
+                    </>
                   ) : (
                     <div className="detail-placeholder">Yufa</div>
                   )}
@@ -548,11 +626,19 @@ function ProductDetailPage() {
                 <p className="detail-description">
                   {product.description || "A considered piece from the Yufa collection, selected for modest elegance and everyday refinement."}
                 </p>
-                <p className="detail-price">
-                  {selectedVariant
-                    ? formatCurrency(activePrice)
-                    : getProductPriceLabel(product)}
-                </p>
+                {product.isOnSale && originalPrice > 0 && !selectedVariant ? (
+                  <p className="detail-price sale">
+                    <span>{getProductPriceLabel(product)}</span>
+                    <span className="detail-original-price">{formatCurrency(originalPrice)}</span>
+                    <span className="detail-sale-badge">Sale</span>
+                  </p>
+                ) : (
+                  <p className="detail-price">
+                    {selectedVariant
+                      ? formatCurrency(activePrice)
+                      : getProductPriceLabel(product)}
+                  </p>
+                )}
 
                 {hasVariants && (
                   <div className="variant-field">

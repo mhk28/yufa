@@ -7,6 +7,10 @@ export const formatCurrency = (amount = 0) =>
   }).format(Number(amount) || 0);
 
 export const getProductPrice = (product) => {
+  if (product?.isOnSale && Number(product?.salePrice) > 0) {
+    return Number(product.salePrice);
+  }
+
   const variantPrices = product?.variants
     ?.map((variant) => Number(variant.price))
     .filter((price) => Number.isFinite(price) && price > 0);
@@ -19,6 +23,10 @@ export const getProductPrice = (product) => {
 };
 
 export const getProductPriceLabel = (product) => {
+  if (product?.isOnSale && Number(product?.salePrice) > 0) {
+    return formatCurrency(product.salePrice);
+  }
+
   const hasVariantPricing = product?.variants?.some((variant) => Number(variant.price) > 0);
   const price = getProductPrice(product);
 
@@ -26,6 +34,11 @@ export const getProductPriceLabel = (product) => {
 
   return `${hasVariantPricing ? "From " : ""}${formatCurrency(price)}`;
 };
+
+export const getProductOriginalPrice = (product) =>
+  product?.isOnSale && Number(product?.salePrice) > 0
+    ? Number(product?.basePrice ?? product?.price) || 0
+    : 0;
 
 export const categoryToSlug = (category = "") =>
   category

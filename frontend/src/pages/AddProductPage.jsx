@@ -13,6 +13,8 @@ function AddProductPage() {
   const [subcategory, setSubcategory] = useState("");
   const [design, setDesign] = useState("");
   const [basePrice, setBasePrice] = useState("");
+  const [isOnSale, setIsOnSale] = useState(false);
+  const [salePrice, setSalePrice] = useState("");
   const [isShowcased, setIsShowcased] = useState(false);
   const [showcaseTitle, setShowcaseTitle] = useState("");
   const [showcaseSubtitle, setShowcaseSubtitle] = useState("");
@@ -125,6 +127,8 @@ function AddProductPage() {
       formData.append("subcategory", subcategory);
       formData.append("design", design);
       formData.append("basePrice", basePrice);
+      formData.append("isOnSale", isOnSale);
+      formData.append("salePrice", salePrice);
       formData.append("isShowcased", isShowcased);
       formData.append("showcaseTitle", showcaseTitle);
       formData.append("showcaseSubtitle", showcaseSubtitle);
@@ -778,7 +782,7 @@ gap: 32px;
               )}
 
               <div className="form-row">
-                <div className="form-group full">
+                <div className={isOnSale ? "form-group" : "form-group full"}>
                   <label className="field-label">Base Price (SGD)</label>
                   <input
                     className="field-input"
@@ -790,6 +794,37 @@ gap: 32px;
                     onChange={(e) => setBasePrice(e.target.value)}
                   />
                 </div>
+                {isOnSale && (
+                  <div className="form-group">
+                    <label className="field-label">Sale Price (SGD)</label>
+                    <input
+                      className="field-input"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="e.g. 29.90"
+                      value={salePrice}
+                      onChange={(e) => setSalePrice(e.target.value)}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="form-group full">
+                <label className="showcase-toggle-row">
+                  <input
+                    className="showcase-checkbox"
+                    type="checkbox"
+                    checked={isOnSale}
+                    onChange={(e) => setIsOnSale(e.target.checked)}
+                  />
+                  <span className="showcase-toggle-text">
+                    <span className="showcase-toggle-title">Mark as discounted</span>
+                    <span className="showcase-toggle-copy">
+                      Sale pricing appears only when this is ticked and the sale price is lower than the base price.
+                    </span>
+                  </span>
+                </label>
               </div>
 
               <div className="form-group full">

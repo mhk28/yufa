@@ -24,13 +24,14 @@ function AdminLayout({ children }) {
 
         .admin-layout {
           display: flex;
-          min-height: 100dvh;
+          height: 100dvh;
+          overflow: hidden;
         }
 
         .admin-main {
           flex: 1;
           background: #f8f5f2;
-          min-height: 100dvh;
+          height: 100dvh;
           overflow-y: auto;
           margin-left: 260px;
           min-width: 0;
@@ -71,7 +72,9 @@ function AdminLayout({ children }) {
         @media (max-width: 840px) {
           .admin-layout {
             flex-direction: column;
+            height: auto;
             min-height: auto;
+            overflow: visible;
           }
 
           .admin-main {
