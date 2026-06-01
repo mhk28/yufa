@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import StoreLayout from "../components/StoreLayout";
+import ProductCard from "../components/ProductCard";
 import { useCart } from "../context/CartContext";
 import { getProductCollectionLabel } from "../data/catalogueOptions";
 import {
@@ -13,8 +14,10 @@ import {
 
 function ProductDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { addItem } = useCart();
   const [product, setProduct] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState("");
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -67,6 +70,36 @@ function ProductDetailPage() {
       quantity: 1,
     });
   };
+
+  const handleBuyNow = () => {
+    handleAddToCart();
+
+    if (product && canAddToCart) {
+      navigate("/checkout");
+    }
+  };
+
+  useEffect(() => {
+    const loadRelatedProducts = async () => {
+      if (!product?.category) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/products/published`);
+        const data = await response.json();
+        const related = Array.isArray(data)
+          ? data
+              .filter((item) => item._id !== product._id && item.category === product.category)
+              .slice(0, 4)
+          : [];
+
+        setRelatedProducts(related);
+      } catch (error) {
+        setRelatedProducts([]);
+      }
+    };
+
+    loadRelatedProducts();
+  }, [product]);
 
   return (
     <>
@@ -326,6 +359,37 @@ function ProductDetailPage() {
           color: rgba(45, 17, 85, 0.38);
         }
 
+        .related-section {
+          width: min(1180px, 100%);
+          margin: clamp(36px, 7vw, 84px) auto 0;
+          padding-top: clamp(28px, 5vw, 54px);
+          border-top: 1px solid rgba(201, 168, 76, 0.18);
+          text-align: left;
+        }
+
+        .related-kicker {
+          margin: 0 0 10px;
+          font-family: 'Jost', sans-serif;
+          font-size: 10px;
+          letter-spacing: 0.24em;
+          text-transform: uppercase;
+          color: #c9a84c;
+        }
+
+        .related-title {
+          margin: 0 0 24px;
+          font-family: 'Cormorant Garamond', serif;
+          font-size: clamp(34px, 5vw, 52px);
+          font-weight: 300;
+          color: #1a0a2e;
+        }
+
+        .related-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: clamp(16px, 3vw, 28px);
+        }
+
         @media (max-width: 860px) {
           .product-detail-grid {
             grid-template-columns: 1fr;
@@ -415,6 +479,11 @@ function ProductDetailPage() {
           .detail-secondary {
             width: 100%;
             justify-content: center;
+          }
+
+          .related-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px 12px;
           }
         }
       `}</style>
@@ -512,12 +581,32 @@ function ProductDetailPage() {
                   >
                     Add to Cart
                   </button>
+                  <button
+                    className="detail-primary"
+                    type="button"
+                    onClick={handleBuyNow}
+                    disabled={!canAddToCart}
+                  >
+                    Buy Now
+                  </button>
                   <Link className="detail-secondary" to="/contact">
                     Enquire
                   </Link>
                 </div>
               </div>
             </div>
+
+            {relatedProducts.length > 0 && (
+              <div className="related-section">
+                <p className="related-kicker">Curated for you</p>
+                <h2 className="related-title">You may also like</h2>
+                <div className="related-grid">
+                  {relatedProducts.map((relatedProduct) => (
+                    <ProductCard key={relatedProduct._id} product={relatedProduct} />
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
         )}
       </StoreLayout>

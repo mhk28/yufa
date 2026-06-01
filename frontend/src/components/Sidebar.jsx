@@ -100,11 +100,13 @@ function Sidebar() {
           background: linear-gradient(175deg, #1a0a2e 0%, #2d1155 50%, #1a0a2e 100%);
           display: flex;
           flex-direction: column;
-          position: sticky;
+          position: fixed;
           top: 0;
+          left: 0;
           height: 100vh;
           overflow: hidden;
           flex-shrink: 0;
+          z-index: 20;
         }
 
         .yufa-sidebar::before {
@@ -257,6 +259,7 @@ function Sidebar() {
             min-height: auto;
             height: auto;
             position: relative;
+            left: auto;
           }
 
           .sidebar-logo-area {

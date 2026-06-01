@@ -32,6 +32,8 @@ function AdminLayout({ children }) {
           background: #f8f5f2;
           min-height: 100dvh;
           overflow-y: auto;
+          margin-left: 260px;
+          min-width: 0;
         }
 
         .admin-topbar {
@@ -75,6 +77,7 @@ function AdminLayout({ children }) {
           .admin-main {
             min-height: auto;
             overflow-y: visible;
+            margin-left: 0;
           }
 
           .admin-content {
