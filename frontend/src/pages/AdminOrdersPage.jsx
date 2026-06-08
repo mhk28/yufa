@@ -6,18 +6,26 @@ import { API_BASE_URL, formatCurrency } from "../utils/storefront";
 function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const fetchOrders = async () => {
     setLoading(true);
+    setError("");
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/orders`, {
         headers: { Authorization: token },
       });
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to load orders.");
+      }
+
       setOrders(Array.isArray(data) ? data : []);
     } catch (error) {
       console.log(error);
+      setError(error.message || "Unable to load orders.");
     } finally {
       setLoading(false);
     }
@@ -28,7 +36,10 @@ function AdminOrdersPage() {
   }, []);
 
   const stats = useMemo(() => {
-    const sales = orders.reduce((total, order) => total + order.subtotal + order.shipping, 0);
+    const sales = orders.reduce(
+      (total, order) => total + (Number(order.subtotal) || 0) + (Number(order.shipping) || 0),
+      0
+    );
     const pending = orders.filter((order) => order.orderStatus === "received").length;
 
     return { sales, pending };
@@ -165,6 +176,18 @@ function AdminOrdersPage() {
           text-align: left;
         }
 
+        .order-error {
+          padding: 18px;
+          margin-bottom: 18px;
+          border: 1px solid rgba(192, 57, 43, 0.22);
+          background: rgba(192, 57, 43, 0.06);
+          color: #9f2f25;
+          font-family: 'Jost', sans-serif;
+          font-size: 13px;
+          line-height: 1.6;
+          text-align: left;
+        }
+
         @media (max-width: 760px) {
           .admin-stat-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -244,7 +267,13 @@ function AdminOrdersPage() {
             </div>
           </div>
 
-          {!loading && orders.length === 0 && (
+          {error && (
+            <div className="order-error">
+              Orders could not load: {error}
+            </div>
+          )}
+
+          {!loading && !error && orders.length === 0 && (
             <div className="order-empty">No orders yet.</div>
           )}
 
@@ -271,10 +300,12 @@ function AdminOrdersPage() {
                     <option value="fulfilled">Fulfilled</option>
                     <option value="cancelled">Cancelled</option>
                   </select>
-                  <div className="order-admin-id">{formatCurrency(order.subtotal + order.shipping)}</div>
+                  <div className="order-admin-id">
+                    {formatCurrency((Number(order.subtotal) || 0) + (Number(order.shipping) || 0))}
+                  </div>
                 </div>
               </div>
-              {order.items.map((item, index) => (
+              {(order.items || []).map((item, index) => (
                 <div className="order-admin-item" key={`${item.productId}-${index}`}>
                   {item.name} ({item.variantLabel || "Standard"}) x {item.quantity}
                 </div>

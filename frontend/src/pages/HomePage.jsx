@@ -185,6 +185,31 @@ function HomePage() {
           color: rgba(255, 255, 255, 0.78);
         }
 
+        .home-hero-overlay-action {
+          width: fit-content;
+          min-height: 42px;
+          display: inline-flex;
+          align-items: center;
+          margin-top: 18px;
+          padding: 0 18px;
+          border: 1px solid rgba(232, 201, 110, 0.72);
+          background: rgba(26, 10, 46, 0.42);
+          color: #f8e8ac;
+          text-decoration: none;
+          font-family: 'Jost', sans-serif;
+          font-size: 10px;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          backdrop-filter: blur(8px);
+          transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+
+        .home-hero-overlay-action:hover {
+          background: #f8e8ac;
+          color: #2d1155;
+          transform: translateY(-1px);
+        }
+
         .showcase-dots {
           position: absolute;
           left: 28px;
@@ -391,6 +416,17 @@ function HomePage() {
             min-height: 360px;
           }
 
+          .home-hero-overlay {
+            inset: auto 20px 22px 20px;
+          }
+
+          .home-hero-overlay-action {
+            min-height: 40px;
+            padding: 0 15px;
+            font-size: 9px;
+            letter-spacing: 0.14em;
+          }
+
           .showcase-arrow {
             width: 40px;
             height: 40px;
@@ -476,10 +512,15 @@ function HomePage() {
               <img className="home-hero-media" src={getImageUrl(heroImage)} alt="Yufa featured collection" />
             ) : null}
 
-            {(activeSlide?.title || activeSlide?.subtitle) && (
+            {(activeSlide?.title || activeSlide?.subtitle || activeSlide?.productId) && (
               <div className="home-hero-overlay">
                 {activeSlide.title && <h2 className="home-hero-overlay-title">{activeSlide.title}</h2>}
                 {activeSlide.subtitle && <p className="home-hero-overlay-copy">{activeSlide.subtitle}</p>}
+                {activeSlide.sourceType === "product" && activeSlide.productId && (
+                  <Link className="home-hero-overlay-action" to={`/product/${activeSlide.productId}`}>
+                    View Piece
+                  </Link>
+                )}
               </div>
             )}
           </div>
