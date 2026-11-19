@@ -1,3 +1,4 @@
+const resolveCheckoutItems = require("../utils/checkoutItems");
 const express = require("express");
 const Order = require("../models/Order");
 const User = require("../models/User");
@@ -28,7 +29,9 @@ const notifyOrderCreated = async (order) => {
 
 router.post("/", async (req, res) => {
   try {
-    const { customerInfo, items, subtotal, shippingMethod = "local_delivery", paymentMethod } = req.body;
+    const { customerInfo, shippingMethod = "local_delivery", paymentMethod } = req.body;
+
+    const { items, subtotal } = await resolveCheckoutItems(req.body.items);
 
     if (!items?.length) {
       return res.status(400).json({ message: "Order requires at least one item." });
@@ -58,7 +61,9 @@ router.post("/customer", authMiddleware, async (req, res) => {
       return res.status(403).json({ message: "Customer access required." });
     }
 
-    const { customerInfo, items, subtotal, shippingMethod = "local_delivery", paymentMethod } = req.body;
+    const { customerInfo, shippingMethod = "local_delivery", paymentMethod } = req.body;
+
+    const { items, subtotal } = await resolveCheckoutItems(req.body.items);
 
     if (!items?.length) {
       return res.status(400).json({ message: "Order requires at least one item." });

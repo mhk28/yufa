@@ -1,3 +1,4 @@
+import { getImageUrl } from "../utils/storefront";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import StoreLayout from "../components/StoreLayout";
@@ -157,7 +158,8 @@ function CustomerOrdersPage() {
                   </div>
                   {(order.items || []).map((item, index) => (
                     <div className="order-item" key={`${item.productId}-${index}`}>
-                      {item.name} x {item.quantity} - {formatCurrency(item.price * item.quantity)}
+                      {item.image && <img src={getImageUrl(item.image)} alt={item.variantLabel || item.name} style={{ width: 48, height: 56, objectFit: "cover", marginRight: 12, verticalAlign: "middle" }} />}
+{item.name}{item.variantLabel ? ` (${item.variantLabel})` : ""} x {item.quantity} - {formatCurrency(item.price * item.quantity)}
                     </div>
                   ))}
                 </div>

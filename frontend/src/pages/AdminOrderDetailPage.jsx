@@ -1,3 +1,4 @@
+import { getImageUrl } from "../utils/storefront";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import AdminLayout from "../components/AdminLayout";
@@ -163,7 +164,8 @@ function AdminOrderDetailPage() {
                   <h2 className="panel-heading">Purchased Items</h2>
                   {order.items.map((item, index) => (
                     <div className="order-item-row" key={`${item.productId}-${index}`}>
-                      <span>{item.name} {item.variantLabel ? `(${item.variantLabel})` : ""} x {item.quantity}</span>
+                      {item.image && <img src={getImageUrl(item.image)} alt={item.variantLabel || item.name} style={{ width: 48, height: 56, objectFit: "cover", marginRight: 12, verticalAlign: "middle" }} />}
+<span>{item.name} {item.variantLabel ? `(${item.variantLabel})` : ""} x {item.quantity}</span>
                       <span>{formatCurrency(item.price * item.quantity)}</span>
                     </div>
                   ))}

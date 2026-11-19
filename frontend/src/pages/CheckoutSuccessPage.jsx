@@ -95,7 +95,7 @@ function CheckoutSuccessPage() {
       <StoreLayout>
         <section className="checkout-result">
           <div className="checkout-result-inner">
-            <p className="checkout-result-kicker">Payment Received</p>
+            <p className="checkout-result-kicker">Checkout submitted</p>
             <h1 className="checkout-result-title">Thank you</h1>
             <p className="checkout-result-copy">
               Your order has been received. Stripe will confirm payment with Yufa in the background,

@@ -102,3 +102,17 @@ Before announcing a new product:
 4. Publish it.
 5. Enable showcase only if it should appear on the homepage.
 6. Check the public collections page on mobile.
+
+
+## Design code options
+
+For example, keep a hijab classified as **Scarves & Hijabs / Matte Satin Silk / Printed**. In Add/Edit Product, use **Design codes & sizes** to add CS123, CS124 and other selectable designs under that product.
+
+1. Upload the product photos.
+2. Add a row for each design code (and each size, if applicable).
+3. Set its price and stock, then assign its matching photo in **Design photo**.
+4. Save the product. Shoppers can select the code using photo buttons; the main image, selected option and cart use that design. The code is also recorded in checkout, order pages, Stripe line items and order emails.
+
+Codes must be unique within a product for each size; comparison ignores case and surrounding spaces. Each option requires a photo, positive price and whole stock quantity. A sold-out design can be previewed but cannot be added to the cart. Existing options keep their IDs, and historical order labels remain unchanged. When editing an older product, review the suggested legacy codes and assign photos before saving.
+
+Checkout checks current prices and available stock. Automatic stock deduction after payment is not implemented yet.

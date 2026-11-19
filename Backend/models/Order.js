@@ -9,6 +9,9 @@ const orderItemSchema = new mongoose.Schema(
     productId: String,
     name: String,
     image: String,
+    designCode: String,
+    color: String,
+    size: String,
     variantKey: String,
     variantLabel: String,
     price: {

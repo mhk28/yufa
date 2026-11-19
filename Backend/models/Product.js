@@ -9,6 +9,8 @@ const variantSchema = new mongoose.Schema({
     type: String,
   },
 
+  designCode: String,
+  image: String,
   color: {
     type: String,
   },

@@ -1,3 +1,5 @@
+import { getDesignCode } from "../utils/variants";
+import VariantEditor from "../components/VariantEditor";
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import AdminLayout from "../components/AdminLayout";
@@ -82,7 +84,7 @@ function EditProductPage() {
       setShowcaseTitle(data.showcaseTitle || "");
       setShowcaseSubtitle(data.showcaseSubtitle || "");
       setShowcaseOrder(data.showcaseOrder ?? "");
-      setVariants(data.variants || []);
+      setVariants((data.variants || []).map(variant => ({ ...variant, designCode: getDesignCode(variant) })));
       const productImages = Array.isArray(data.images) && data.images.length > 0
         ? data.images
         : [data.image].filter(Boolean);
@@ -107,6 +109,7 @@ function EditProductPage() {
   };
 
   const removeGalleryImage = (index) => {
+    setVariants(rows => rows.map(row => ({ ...row, imageIndex: row.imageIndex === "" || row.imageIndex === undefined ? row.imageIndex : Number(row.imageIndex) === index ? "" : Number(row.imageIndex) > index ? Number(row.imageIndex) - 1 : row.imageIndex })));
     const existingCount = existingImages.length;
 
     if (index < existingCount) {
@@ -129,6 +132,7 @@ function EditProductPage() {
 
   const clearNewImages = () => {
     newPreviews.forEach((preview) => URL.revokeObjectURL(preview));
+    setVariants(rows => rows.map(row => row.imageIndex !== "" && Number(row.imageIndex) >= existingImages.length ? { ...row, imageIndex: "" } : row));
     setNewImages([]);
     setNewPreviews([]);
 
@@ -144,27 +148,6 @@ function EditProductPage() {
   const handleSubcategoryChange = (e) => {
     setSubcategory(e.target.value);
     setDesign("");
-  };
-
-  const updateVariant = (index, field, value) => {
-    setVariants((currentVariants) =>
-      currentVariants.map((variant, variantIndex) =>
-        variantIndex === index ? { ...variant, [field]: value } : variant
-      )
-    );
-  };
-
-  const addVariant = () => {
-    setVariants((currentVariants) => [
-      ...currentVariants,
-      { type: "", color: "", size: "", price: "", stock: "", sku: "" },
-    ]);
-  };
-
-  const removeVariant = (index) => {
-    setVariants((currentVariants) =>
-      currentVariants.filter((_, variantIndex) => variantIndex !== index)
-    );
   };
 
   const handleUpdate = async (e) => {
@@ -194,10 +177,11 @@ function EditProductPage() {
         "variants",
         JSON.stringify(
           variants
-            .filter((variant) => variant.price)
+
             .map((variant) => ({
+              ...variant,
               type: variant.type || "",
-              color: variant.color || "",
+              designCode: variant.designCode || "",
               size: variant.size || "",
               sku: variant.sku || "",
               price: Number(variant.price) || 0,
@@ -972,38 +956,9 @@ align-items: center;
                 </div>
 
                 <div className="form-group full">
-                  <div className="variant-panel">
-                    <div className="variant-header">
-                      <p className="variant-title">Variants</p>
-                      <button className="btn-small" type="button" onClick={addVariant}>
-                        Add Variant
-                      </button>
-                    </div>
-
-                    {variants.map((variant, index) => (
-                      <div className="variant-row" key={variant._id || index}>
-                        {["type", "color", "size", "price", "stock", "sku"].map((field) => (
-                          <input
-                            key={field}
-                            className="field-input"
-                            type={field === "price" || field === "stock" ? "number" : "text"}
-                            min={field === "price" || field === "stock" ? "0" : undefined}
-                            step={field === "price" ? "0.01" : undefined}
-                            placeholder={field}
-                            value={variant[field] || ""}
-                            onWheel={field === "price" || field === "stock" ? preventNumberWheel : undefined}
-                            onChange={(e) => updateVariant(index, field, e.target.value)}
-                          />
-                        ))}
-                        <button className="btn-small" type="button" onClick={() => removeVariant(index)}>
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="form-group full image-field">
+                  <VariantEditor variants={variants} setVariants={setVariants} images={galleryImages} basePrice={basePrice} />
+ </div>
+<div className="form-group full image-field">
                   <label className="field-label">Product Image</label>
 
                   <div className="image-upload-shell">

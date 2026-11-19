@@ -1,30 +1,6 @@
 const Product = require("../models/Product");
 
-const parseVariants = (variants) => {
-  if (!variants) return [];
-
-  if (Array.isArray(variants)) return variants;
-
-  try {
-    const parsed = JSON.parse(variants);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    return [];
-  }
-};
-
-const normalizeVariants = (variants) =>
-  parseVariants(variants)
-    .filter((variant) => Number(variant.price) > 0)
-    .map((variant) => ({
-      type: variant.type || "",
-      design: variant.design || "",
-      color: variant.color || "",
-      size: variant.size || "",
-      price: Number(variant.price) || 0,
-      stock: Number(variant.stock) || 0,
-      sku: variant.sku || "",
-    }));
+const { normalizeVariants } = require("../utils/designVariants");
 
 const normalizeCategory = (category = "") => {
   const categoryMap = {
@@ -109,7 +85,7 @@ const createProduct = async (
         price: normalizedBasePrice,
         salePrice: productIsOnSale ? normalizedSalePrice : 0,
         isOnSale: productIsOnSale,
-        variants: normalizeVariants(variants),
+        variants: normalizeVariants(variants, uploadedImages),
         isShowcased: toBoolean(isShowcased),
         showcaseTitle: showcaseTitle || "",
         showcaseSubtitle: showcaseSubtitle || "",
@@ -217,7 +193,7 @@ const updateProduct = async (req, res) => {
     }
 
     if (Object.prototype.hasOwnProperty.call(updateData, "variants")) {
-      updateData.variants = normalizeVariants(updateData.variants);
+      // Resolve images after combining uploads below.
     }
 
     if (Object.prototype.hasOwnProperty.call(updateData, "category")) {
@@ -253,6 +229,10 @@ const updateProduct = async (req, res) => {
       updateData.image = updateData.showcaseImage;
     }
 
+    if (Object.prototype.hasOwnProperty.call(updateData, "variants")) {
+      const current = updateData.images ? null : await Product.findById(req.params.id);
+      updateData.variants = normalizeVariants(updateData.variants, updateData.images || current?.images || []);
+    }
     delete updateData.existingImages;
     delete updateData.showcaseImageIndex;
 
@@ -262,6 +242,7 @@ const updateProduct = async (req, res) => {
         updateData,
         {
           new: true,
+          runValidators: true,
         }
       );
 

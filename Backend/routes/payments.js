@@ -1,3 +1,4 @@
+const resolveCheckoutItems = require("../utils/checkoutItems");
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const Stripe = require("stripe");
@@ -56,13 +57,15 @@ const getShippingLabel = (shippingMethod, shippingFee) => {
 };
 
 const markCheckoutSessionPaid = async (session) => {
+  if (session.payment_status !== "paid") return;
   const orderId = session.metadata?.orderId;
 
   if (!orderId) return;
 
   const order = await Order.findById(orderId);
 
-  if (order && order.paymentStatus !== "paid") {
+  if (order && order.stripeSessionId === session.id && order.paymentStatus !== "paid") {
+    if (session.currency !== "sgd" || session.amount_total !== Math.round((order.subtotal + order.shipping) * 100)) throw new Error("Payment amount does not match order.");
     order.paymentStatus = "paid";
     order.orderStatus = "paid";
     order.stripeSessionId = session.id;
@@ -79,7 +82,9 @@ router.post("/create-checkout-session", async (req, res) => {
       return res.status(500).json({ message: "Stripe is not configured." });
     }
 
-    const { customerInfo, items, subtotal, shippingMethod = "local_delivery" } = req.body;
+    const { customerInfo, shippingMethod = "local_delivery" } = req.body;
+
+    const { items, subtotal } = await resolveCheckoutItems(req.body.items);
 
     if (!items?.length) {
       return res.status(400).json({ message: "Checkout requires at least one item." });
@@ -167,6 +172,8 @@ const webhookHandler = async (req, res) => {
 
   const signature = req.headers["stripe-signature"];
   let event = req.body;
+
+  if (!process.env.STRIPE_WEBHOOK_SECRET) return res.status(503).send("Stripe webhook verification is not configured.");
 
   if (process.env.STRIPE_WEBHOOK_SECRET) {
     try {

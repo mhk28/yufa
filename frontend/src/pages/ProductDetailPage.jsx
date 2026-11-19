@@ -1,3 +1,4 @@
+import { getDesignCode, getVariantLabel } from "../utils/variants";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import StoreLayout from "../components/StoreLayout";
@@ -30,7 +31,7 @@ function ProductDetailPage() {
     : hasVariants
       ? getProductPrice(product)
       : getProductPrice(product);
-  const canAddToCart = Boolean(activePrice) && (!hasVariants || selectedVariant);
+  const canAddToCart = Boolean(activePrice) && (!hasVariants || (selectedVariant && Number(selectedVariant.stock) > 0));
   const originalPrice = getProductOriginalPrice(product);
 
   useEffect(() => {
@@ -40,6 +41,7 @@ function ProductDetailPage() {
         const data = await response.json();
         setProduct(data?.isPublished ? data : null);
         setActiveImageIndex(0);
+        setSelectedVariantIndex("");
       } catch (error) {
         console.log(error);
       } finally {
@@ -50,13 +52,8 @@ function ProductDetailPage() {
     loadProduct();
   }, [id]);
 
-  const getVariantLabel = (variant) =>
-    [variant.type, variant.design, variant.color, variant.size].filter(Boolean).join(" / ") ||
-    variant.sku ||
-    "Variant";
-
   const galleryImages = product
-    ? [...new Set([product.showcaseImage, product.image, ...(product.images || [])].filter(Boolean))]
+    ? [...new Set([product.showcaseImage, product.image, ...(product.images || []), ...(product.variants || []).map(variant => variant.image)].filter(Boolean))]
     : [];
 
   const showPreviousImage = () => {
@@ -81,7 +78,10 @@ function ProductDetailPage() {
       variantKey: selectedVariant ? selectedVariant._id || String(selectedVariantIndex) : "",
       variantLabel: selectedVariant ? getVariantLabel(selectedVariant) : "Standard",
       name: product.name,
-      image: product.image,
+      image: selectedVariant?.image || product.image,
+      designCode: selectedVariant ? getDesignCode(selectedVariant) : "",
+      size: selectedVariant?.size || "",
+      stock: selectedVariant ? Number(selectedVariant.stock) : undefined,
       price: activePrice,
       quantity: 1,
     });
@@ -344,6 +344,13 @@ function ProductDetailPage() {
           text-transform: uppercase;
         }
 
+        .design-options { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+        .design-option { position: relative; display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: white; color: #2d1155; border: 1px solid #ccc; cursor: pointer; border-radius: 4px; font: inherit; }
+        .design-option.selected { border: 2px solid #2d1155; background: #f5f0fa; }
+        .design-option.selected::after { content: '✓'; color: #2d1155; }
+        .design-option:focus-visible { outline: 3px solid #c9a84c; outline-offset: 3px; }
+        .design-option img { width: 56px; height: 64px; object-fit: cover; }
+        .design-option small { display: block; color: #777; }
         .variant-field {
           display: flex;
           flex-direction: column;
@@ -569,7 +576,7 @@ function ProductDetailPage() {
                       <img
                         className="detail-image"
                         src={getImageUrl(galleryImages[activeImageIndex] || galleryImages[0])}
-                        alt={product.name}
+                        alt={selectedVariant ? `${product.name} — ${getVariantLabel(selectedVariant)}` : product.name}
                       />
                       {galleryImages.length > 1 && (
                         <>
@@ -642,19 +649,24 @@ function ProductDetailPage() {
 
                 {hasVariants && (
                   <div className="variant-field">
-                    <label className="variant-label">Select Option</label>
-                    <select
-                      className="variant-select"
-                      value={selectedVariantIndex}
-                      onChange={(e) => setSelectedVariantIndex(e.target.value)}
-                    >
-                      <option value="">Choose a variant</option>
-                      {product.variants.map((variant, index) => (
-                        <option key={variant._id || index} value={index}>
-                          {getVariantLabel(variant)} - {formatCurrency(variant.price)}
-                        </option>
-                      ))}
-                    </select>
+                    <p className="variant-label">Design code: {selectedVariant ? getDesignCode(selectedVariant) : "Choose a design"}</p>
+                    <div role="group" aria-label="Choose design code and size" className="design-options">
+                      {product.variants.map((variant, index) => {
+                        const soldOut = Number(variant.stock) <= 0;
+                        const selected = selectedVariantIndex === String(index);
+                        const photo = variant.image || product.image;
+                        return <button type="button" key={variant._id || index} className={`design-option${selected ? " selected" : ""}`} aria-pressed={selected} onClick={() => {
+                          setSelectedVariantIndex(String(index));
+                          setActiveImageIndex(Math.max(0, galleryImages.indexOf(photo)));
+                        }}>
+                          {photo && <img src={getImageUrl(photo)} alt={`Design ${getDesignCode(variant)}`} />}
+                          <span>{getDesignCode(variant) || variant.type || `Option ${index + 1}`}{variant.size ? ` / ${variant.size}` : ""}</span>
+                          {soldOut && <small>Sold out</small>}
+                        </button>;
+                      })}
+                    </div>
+                    {selectedVariant && <p role="status">Selected: {getVariantLabel(selectedVariant)} · {Number(selectedVariant.stock) > 0 ? `${selectedVariant.stock} available` : "Sold out"}</p>}
+
                   </div>
                 )}
 

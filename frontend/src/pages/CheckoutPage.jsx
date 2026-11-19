@@ -1,3 +1,4 @@
+import { getImageUrl } from "../utils/storefront";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import StoreLayout from "../components/StoreLayout";
@@ -641,7 +642,8 @@ function CheckoutPage() {
               ) : (
                 items.map((item) => (
                   <div className="summary-item" key={`${item.productId}-${item.variantKey || "base"}`}>
-                    <div className="summary-item-top">
+                    {item.image && <img src={getImageUrl(item.image)} alt={item.variantLabel || item.name} style={{ width: 48, height: 56, objectFit: "cover", marginRight: 12, verticalAlign: "middle" }} />}
+<div className="summary-item-top">
                       <span className="summary-item-name">
                         {item.name}
                         {item.variantLabel ? ` (${item.variantLabel})` : ""}

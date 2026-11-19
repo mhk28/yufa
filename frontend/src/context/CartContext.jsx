@@ -1,3 +1,4 @@
+import { getVariantLabel } from "../utils/variants";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const CartContext = createContext(null);
@@ -8,7 +9,8 @@ export function CartProvider({ children }) {
   const [items, setItems] = useState(() => {
     try {
       const stored = localStorage.getItem(CART_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
+      const parsed = stored ? JSON.parse(stored) : [];
+      return Array.isArray(parsed) ? parsed.map(item => item.designCode ? { ...item, variantLabel: getVariantLabel(item) } : item) : [];
     } catch (error) {
       return [];
     }
@@ -32,7 +34,7 @@ export function CartProvider({ children }) {
 
       return currentItems.map((cartItem, index) =>
         index === existingIndex
-          ? { ...cartItem, quantity: cartItem.quantity + (item.quantity || 1) }
+          ? { ...cartItem, ...item, quantity: Math.min(item.stock ?? Infinity, cartItem.quantity + (item.quantity || 1)) }
           : cartItem
       );
     });
@@ -52,7 +54,7 @@ export function CartProvider({ children }) {
     setItems((currentItems) =>
       currentItems.map((item) =>
         item.productId === productId && (item.variantKey || "") === variantKey
-          ? { ...item, quantity: nextQuantity }
+          ? { ...item, quantity: Math.min(item.stock ?? Infinity, nextQuantity) }
           : item
       )
     );
